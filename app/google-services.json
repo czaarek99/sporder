@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "114210345232",
+    "firebase_url": "https://fir-sporder.firebaseio.com",
+    "project_id": "firebase-sporder",
+    "storage_bucket": "firebase-sporder.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:114210345232:android:e813421f3ba674dc",
+        "android_client_info": {
+          "package_name": "net.czaarek99.spotifyreorder"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "114210345232-a82jblpnijl9u6se0edov2omimjj27mf.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
+          "client_id": "114210345232-rlj9ehctm7l0t2nc78g7l1g7hf7g6gti.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC9VvAgnAEzWphc90rzce2BNKEsBb1SSPQ"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

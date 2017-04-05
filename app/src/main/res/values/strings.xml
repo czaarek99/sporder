@@ -1,0 +1,42 @@
+<resources>
+    <string name="app_name">Sporder</string>
+    <string name="log_in">Log in</string>
+    <string name="track_amount">%1$d Tracks</string>
+    <string name="loading_playlist">Loading playlist tracks…</string>
+    <string name="remove_selection">Clear selection</string>
+    <string name="send_to_bottom">Send to bottom</string>
+    <string name="send_to_top">Send to top</string>
+    <string name="delete_tracks">Delete tracks</string>
+    <string name="can_only_edit_own_playlists">Only playlists that you own are displayed. Editing collaborative playlists owned by other users is currently unsupported.</string>
+    <string name="reorder_image_description">Change playlist order</string>
+    <string name="selection_settings_image_description">Options for selection</string>
+    <string name="error">Error</string>
+
+    <string name="playlists_ad_id">ca-app-pub-7701342036796677/1382826148</string>
+    <string name="tracks_ad_id">ca-app-pub-7701342036796677/4805467341</string>
+    <string name="Ok">OK</string>
+
+    <string name="fetch_playlists_error">
+        Norman is sorry but he couldn\'t find your playlists.
+        He suggests trying to log in again.
+    </string>
+    <string name="fetch_tracks_error">
+        Meow. Seems like norman lost the tracks for this song. He recompensates with a joke:
+        \nQ: Do you want to hear a bad cat joke?
+        \nA: Just kitten.
+    </string>
+    <string name="modify_playlist_error">
+        While Norman was on his way to the spotify servers he lost your changes.
+        He is very sorry but is also fairly sure you can just try again.
+    </string>
+    <string name="fetch_playlist_info_error">
+        Seems like Norman chewed on some important info. You might have to try that again.
+    </string>
+    <string name="fetch_user_data_error">
+        Norman won\'t play unless you tell him your name! Please try logging in again.
+    </string>
+    <string name="log_in_error">
+        They didn\'t let Norman into the spotify building! Try logging in again.
+    </string>
+
+</resources>

@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:ads="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    >
+
+    <LinearLayout
+        android:id="@+id/mainTrackLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="0dp"
+        android:orientation="vertical"
+        tools:context="net.czaarek99.spotifyreorder.activity.TracksActivity">
+
+        <LinearLayout
+            android:id="@+id/playlistProgressLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/loadingPlaylistText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/loading_playlist"
+                android:gravity="center"
+                android:textAppearance="@android:style/TextAppearance.Large" />
+
+            <ProgressBar
+                android:id="@+id/playlistLoadProgress"
+                style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:indeterminate="false"
+                android:max="100"
+                android:progress="0" />
+        </LinearLayout>
+
+        <com.woxthebox.draglistview.DragListView
+            android:id="@+id/trackList"
+            android:scrollbars="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            />
+
+        <com.google.android.gms.ads.AdView
+            android:id="@+id/tracksAd"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            ads:adSize="BANNER"
+            ads:adUnitId="@string/tracks_ad_id"
+            android:background="#00000000"
+            />
+    </LinearLayout>
+
+    <RelativeLayout
+        android:id="@+id/selectionOptionsMainLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentBottom="true"
+        android:visibility="gone">
+
+        <View
+            android:id="@+id/selectionOptionsDismissView"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_alignBottom="@+id/selectionOptionsScrollView"
+            android:layout_alignParentTop="true" />
+
+        <ScrollView
+            android:id="@id/selectionOptionsScrollView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:background="#f3000000"
+            android:visibility="visible">
+
+
+            <LinearLayout
+                android:id="@+id/selectionOptionsLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <include
+                    android:id="@+id/sendToTopText"
+                    layout="@layout/selection_settings_option" />
+
+                <include
+                    android:id="@+id/sendToBottomText"
+                    layout="@layout/selection_settings_option" />
+
+                <include
+                    android:id="@+id/removeSelectionText"
+                    layout="@layout/selection_settings_option" />
+
+                <include
+                    android:id="@+id/deleteTracksText"
+                    layout="@layout/selection_settings_option"
+                    />
+            </LinearLayout>
+        </ScrollView>
+
+    </RelativeLayout>
+
+
+
+</RelativeLayout>
+
+
+
