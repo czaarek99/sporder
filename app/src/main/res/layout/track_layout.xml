@@ -1,117 +1,156 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<net.czaarek99.spotifyreorder.item.TrackSwipeItem
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/trackRelativeLayout"
+    android:id="@+id/trackSwipeItem"
+    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="5dp"
-    android:background="@color/translucentBlack"
-    android:orientation="vertical">
+    app:rightViewId="@+id/trashLayout"
+    app:leftViewId="@+id/leftDummy"
+    app:swipeViewId="@+id/trackRelativeLayout"
+    >
+
+    <View android:id="@id/leftDummy"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        />
 
     <LinearLayout
-        android:id="@+id/textCutOffLayout"
-        android:orientation="horizontal"
-        android:layout_width="50dp"
+        android:id="@+id/trashLayout"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_alignTop="@+id/trackLayout"
-        android:layout_alignBottom="@id/trackLayout"
-        android:layout_alignEnd="@+id/reorderImage"
-        android:layout_alignRight="@+id/reorderImage"
-        android:width="30dp"
-        >
+        android:layout_alignBottom="@+id/trackRelativeLayout"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignRight="@id/trackRelativeLayout"
+        android:layout_alignEnd="@id/trackRelativeLayout"
+        android:layout_alignTop="@id/trackRelativeLayout"
+        android:background="#FF0000"
+        android:orientation="vertical">
 
-        <View
-            android:id="@+id/textCutOffGradient"
-            android:layout_width="20dp"
+        <ImageView
+            android:id="@+id/trashTrackImage"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@drawable/text_fade_gradient"
-            android:visibility="visible" />
-
-        <View
-            android:background="#000000"
-            android:id="@+id/textCutOffSolid"
-            android:layout_width="30dp"
-            android:layout_height="match_parent"
-            />
-
+            android:adjustViewBounds="false"
+            android:cropToPadding="false"
+            android:textAppearance="@android:style/TextAppearance.Large"
+            app:srcCompat="@drawable/trash" />
     </LinearLayout>
 
-    <ImageView
-        android:id="@id/reorderImage"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_centerVertical="true"
-        android:adjustViewBounds="false"
-        android:background="#000000"
-        android:contentDescription="@string/reorder_image_description"
-        android:cropToPadding="false"
-        android:gravity="end"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:srcCompat="@drawable/menu"
-        tools:layout_editor_absoluteY="81dp" />
-
-    <ImageView
-        android:id="@+id/settingsImage"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_centerVertical="true"
-        android:adjustViewBounds="false"
-        android:background="#000000"
-        android:contentDescription="@string/selection_settings_image_description"
-        android:cropToPadding="false"
-        android:gravity="end"
-        android:visibility="invisible"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:srcCompat="@drawable/settings"
-        tools:layout_editor_absoluteY="81dp" />
-
-    <LinearLayout
-        android:id="@id/trackLayout"
+    <RelativeLayout
+        android:id="@id/trackRelativeLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <CheckBox
-            android:id="@+id/reorderCheckbox"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_weight="1"
-            android:checked="false"
-            android:duplicateParentState="false"
-            android:visibility="visible" />
+        android:layout_marginBottom="5dp"
+        android:background="@color/translucentBlack"
+        android:orientation="vertical">
 
         <LinearLayout
-            android:id="@+id/trackInfoLayout"
+            android:id="@+id/trackLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/trackNameText"
-                android:layout_width="wrap_content"
+            <CheckBox
+                android:id="@+id/reorderCheckbox"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:text="Track name"
-                android:textAppearance="@android:style/TextAppearance.Medium"
-                tools:ignore="HardcodedText" />
-
-            <TextView
-                android:id="@+id/trackInfoText"
-                android:layout_width="wrap_content"
-                android:layout_height="0dp"
+                android:layout_gravity="center"
                 android:layout_weight="1"
-                android:maxLines="1"
-                android:text="More track info"
-                tools:ignore="HardcodedText" />
+                android:checked="false"
+                android:duplicateParentState="false"
+                android:visibility="visible" />
+
+            <LinearLayout
+                android:id="@+id/trackInfoLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/trackNameText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:maxLines="1"
+                    android:text="Track name"
+                    android:textAppearance="@android:style/TextAppearance.Medium"
+                    tools:ignore="HardcodedText" />
+
+                <TextView
+                    android:id="@+id/trackInfoText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:maxLines="1"
+                    android:text="More track info"
+                    tools:ignore="HardcodedText" />
+
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/textCutOffLayout"
+            android:layout_width="50dp"
+            android:layout_height="match_parent"
+            android:layout_alignBottom="@+id/trackLayout"
+            android:layout_alignEnd="@+id/reorderImage"
+            android:layout_alignRight="@+id/reorderImage"
+            android:layout_alignTop="@+id/trackLayout"
+            android:width="30dp"
+            android:orientation="horizontal">
+
+            <View
+                android:id="@+id/textCutOffGradient"
+                android:layout_width="20dp"
+                android:layout_height="match_parent"
+                android:background="@drawable/text_fade_gradient"
+                android:visibility="visible" />
+
+            <View
+                android:id="@+id/textCutOffSolid"
+                android:layout_width="30dp"
+                android:layout_height="match_parent"
+                android:background="#000000" />
 
         </LinearLayout>
-    </LinearLayout>
 
-</RelativeLayout>
+        <ImageView
+            android:id="@+id/settingsImage"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:adjustViewBounds="false"
+            android:background="#000000"
+            android:contentDescription="@string/selection_settings_image_description"
+            android:cropToPadding="false"
+            android:gravity="end"
+            android:visibility="invisible"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:srcCompat="@drawable/settings"
+            tools:layout_editor_absoluteY="81dp" />
+
+        <ImageView
+            android:id="@+id/reorderImage"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:adjustViewBounds="false"
+            android:background="#000000"
+            android:contentDescription="@string/reorder_image_description"
+            android:cropToPadding="false"
+            android:gravity="end"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:srcCompat="@drawable/menu"
+            tools:layout_editor_absoluteY="81dp" />
+    </RelativeLayout>
+
+</net.czaarek99.spotifyreorder.item.TrackSwipeItem>
+

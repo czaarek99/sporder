@@ -1,9 +1,13 @@
 package net.czaarek99.spotifyreorder.activity;
 
 import android.os.Bundle;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.View;
+import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.ads.AdView;
 
@@ -42,12 +46,11 @@ public class PlaylistsActivity extends SporderActivity {
         AdView playlistsAd = (AdView) findViewById(R.id.playlistsAd);
         playlistsAd.loadAd(Util.constructSafeAdRequest());
 
-        //TODO: Make this dissapear once you scroll down
-        final TextView playlistInfoText = (TextView) findViewById(R.id.playlistInfoText);
-
         final RecyclerView playlistList = (RecyclerView) findViewById(R.id.playlistList);
         playlistList.setAdapter(playlistAdapter);
         playlistList.setLayoutManager(new LinearLayoutManager(this));
+        playlistList.setHasFixedSize(true);
+        playlistList.setNestedScrollingEnabled(false);
 
         fetchPlaylists(new PlaylistFetchCallback() {
             @Override
@@ -70,9 +73,10 @@ public class PlaylistsActivity extends SporderActivity {
                             public void onSuccess(List<PlaylistSimple> playlists) {
                                 //Toast.makeText(PlaylistsActivity.this, "Updated playlists", Toast.LENGTH_LONG).show();
                                 for (PlaylistSimple playlist : playlists) {
-                                    playlistAdapter.updateCachedImageFor(playlist, true);
+                                    playlistAdapter.updateCachedImageFor(playlist);
                                 }
 
+                                playlistAdapter.notifyDataSetChanged();
                                 playlistAdapter.setItemList(playlists);
                             }
                         }, new PlaylistFetchCallback());
@@ -102,7 +106,7 @@ public class PlaylistsActivity extends SporderActivity {
         final List<PlaylistSimple> playlists = new ArrayList<>();
 
         //First get the total playlist amount
-        spotify.getPlaylists(userId, new Callback<Pager<PlaylistSimple>>() {
+        spotify.getMyPlaylists(new Callback<Pager<PlaylistSimple>>() {
             @Override
             public void success(Pager<PlaylistSimple> playlistSimplePager, Response response) {
                 int playlistCount = playlistSimplePager.total;
@@ -128,7 +132,7 @@ public class PlaylistsActivity extends SporderActivity {
                         options.put("offset", iteration.getAndIncrement() * PLAYLISTS_PER_REQUEST);
                         options.put("limit", PLAYLISTS_PER_REQUEST);
 
-                        spotify.getPlaylists(userId, options, callback);
+                        spotify.getMyPlaylists(options, callback);
                     }
                 };
 

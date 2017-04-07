@@ -34,7 +34,6 @@ repositories {
 
     mavenCentral()
     maven { url "https://jitpack.io" }
-
     flatDir {
         dirs 'libs'
     }
@@ -46,15 +45,19 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
 
+    //compile 'com.github.kaaes:spotify-web-api-android:0.4.1'
+    compile('com.squareup.retrofit:retrofit:1.9.0')
+    compile 'com.github.kaaes:spotify-web-api-android-0.4.1@aar'
+
     compile 'com.spotify.sdk:spotify-android-auth-1.0.0@aar'
+    //compile 'com.github.woxthebox:draglistview:1.4.1'
+    compile 'com.github.woxthebox:drag-list-view-2.0.0@aar'
     compile 'uk.co.chrisjenx:calligraphy:2.2.0'
-    compile 'com.github.kaaes:spotify-web-api-android:0.4.1'
-    compile 'com.github.woxthebox:draglistview:1.4.1'
     compile 'com.google.firebase:firebase-ads:10.2.0'
 
-    compile 'com.android.support:appcompat-v7:25.3.0'
+    compile 'com.android.support:appcompat-v7:25.3.1'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
-    compile 'com.android.support:design:25.3.0'
+    compile 'com.android.support:design:25.3.1'
     testCompile 'junit:junit:4.12'
 }
 

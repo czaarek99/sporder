@@ -1,56 +1,79 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:ads="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/mainConstraint"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="net.czaarek99.spotifyreorder.activity.PlaylistsActivity"
-    tools:layout_editor_absoluteY="81dp"
-    tools:layout_editor_absoluteX="0dp">
+    android:layout_height="match_parent">
 
     <LinearLayout
-        android:id="@+id/playlistLayout"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginBottom="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginTop="8dp"
         android:orientation="vertical"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0">
+        android:layout_marginLeft="8dp"
+        ads:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginRight="8dp"
+        ads:layout_constraintRight_toRightOf="parent"
+        ads:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="0dp"
+        ads:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginBottom="0dp">
 
-        <TextView
-            android:id="@+id/playlistInfoText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="@string/can_only_edit_own_playlists"
-            android:textAppearance="@android:style/TextAppearance.Small" />
-
-
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/playlistList"
+        <android.support.v4.widget.NestedScrollView
+            android:id="@+id/playlistScrollView"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"/>
+            android:layout_weight="1"
+            android:fillViewport="true"
+            >
+
+            <LinearLayout
+                android:id="@+id/playlistLayout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.0">
+
+                <TextView
+                    android:id="@+id/playlistInfoText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="@string/can_only_edit_own_playlists"
+                    android:textAppearance="@android:style/TextAppearance.Small" />
+
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/playlistList"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    />
+
+
+            </LinearLayout>
+
+        </android.support.v4.widget.NestedScrollView>
 
         <com.google.android.gms.ads.AdView
             android:id="@+id/playlistsAd"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            ads:adSize="BANNER"
-            ads:adUnitId="@string/playlists_ad_id"
             android:background="#00000000"
-            />
+            ads:adSize="BANNER"
+            ads:adUnitId="@string/playlists_ad_id" />
 
 
     </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>
+
+
+
+
+

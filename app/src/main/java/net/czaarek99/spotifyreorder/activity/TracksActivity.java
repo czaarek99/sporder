@@ -1,22 +1,27 @@
 package net.czaarek99.spotifyreorder.activity;
 
-import android.content.DialogInterface;
 import android.graphics.PorterDuff;
 import android.os.Build;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.util.Pair;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.ads.AdView;
 import com.woxthebox.draglistview.DragListView;
+import com.woxthebox.draglistview.swipe.ListSwipeHelper;
+import com.woxthebox.draglistview.swipe.ListSwipeItem;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -42,26 +47,24 @@ import kaaes.spotify.webapi.android.models.Playlist;
 import kaaes.spotify.webapi.android.models.PlaylistTrack;
 import kaaes.spotify.webapi.android.models.SnapshotId;
 import kaaes.spotify.webapi.android.models.Track;
-import kaaes.spotify.webapi.android.models.TracksToRemove;
-import kaaes.spotify.webapi.android.models.TracksToRemoveWithPosition;
+import kaaes.spotify.webapi.android.models.TrackToRemoveWithPosition;
+import kaaes.spotify.webapi.android.models.TracksToRemoveByPosition;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
 
-//TODO: Delete tracks by swipe and delete by selection
+//TODO: Make scrollbar thumb a fastscroller: https://github.com/timusus/RecyclerView-FastScroll
 //TODO: Auto refresh algorithm
 public class TracksActivity extends SporderActivity {
 
     private final SpotifyReorder reorder = SpotifyReorder.getInstance();
     private final SpotifyService spotify = reorder.getService();
 
-    private final Queue<CallbackGroup<SnapshotId>> reorderCalls = new ConcurrentLinkedQueue<>();
+    private final Queue<CallbackGroup<SnapshotId>> modificationCalls = new ConcurrentLinkedQueue<>();
     private final AtomicBoolean shouldThreadRun = new AtomicBoolean(true);
     private final AtomicReference<String> snapshotId = new AtomicReference<>();
 
     private TrackAdapter trackListAdapter;
-    private ProgressBar playlistLoadProgress;
-    //TODO: Make this animation smooth
     private ProgressBarAnimation progressBarAnimation;
     private LinearLayout progressLayout;
     private RelativeLayout selectionOptionsMainLayout;
@@ -75,8 +78,12 @@ public class TracksActivity extends SporderActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_songs);
 
-        playlistLoadProgress = (ProgressBar) findViewById(R.id.playlistLoadProgress);
-        progressBarAnimation = new ProgressBarAnimation(playlistLoadProgress, 800);
+        ProgressBar playlistLoadProgress = (ProgressBar) findViewById(R.id.playlistLoadProgress);
+        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP){
+            playlistLoadProgress.getProgressDrawable().setColorFilter(ContextCompat.getColor(this, R.color.glueGreen), PorterDuff.Mode.SRC_IN);
+        }
+
+        progressBarAnimation = new ProgressBarAnimation(playlistLoadProgress, 2500);
         progressLayout = (LinearLayout) findViewById(R.id.playlistProgressLayout);
         selectionOptionsMainLayout = (RelativeLayout) findViewById(R.id.selectionOptionsMainLayout);
         selectionOptionsDismissView = findViewById(R.id.selectionOptionsDismissView);
@@ -84,9 +91,7 @@ public class TracksActivity extends SporderActivity {
         AdView tracksAdView = (AdView) findViewById(R.id.tracksAd);
         tracksAdView.loadAd(Util.constructSafeAdRequest());
 
-        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP){
-            playlistLoadProgress.getProgressDrawable().setColorFilter(ContextCompat.getColor(this, R.color.glueGreen), PorterDuff.Mode.SRC_IN);
-        }
+        trackListAdapter = new TrackAdapter(this, new ArrayList<Pair<Long, Track>>());
 
         TextView sendToTopText = (TextView) findViewById(R.id.sendToTopText);
         sendToTopText.setText(R.string.send_to_top);
@@ -97,7 +102,6 @@ public class TracksActivity extends SporderActivity {
                 int fromPosition = trackListAdapter.getSelectionStart();
 
                 if(topPosition != fromPosition){
-                    trackListAdapter.changeSelectionPosition(fromPosition, topPosition);
                     dispatchReorder(fromPosition, topPosition);
                 }
 
@@ -115,7 +119,6 @@ public class TracksActivity extends SporderActivity {
                 int fromPosition = trackListAdapter.getSelectionStart();
 
                 if(bottomPosition != fromPosition){
-                    trackListAdapter.changeSelectionPosition(fromPosition, bottomPosition);
                     dispatchReorder(fromPosition, bottomPosition);
                 }
 
@@ -139,10 +142,8 @@ public class TracksActivity extends SporderActivity {
         deleteTracksText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                TracksToRemoveWithPosition tracksToRemove = new TracksToRemoveWithPosition();
-
-
-                //spotify.removeTracksFromPlaylist(reorder.getUser().id, playlistId, ))
+                dispatchDelete(trackListAdapter.getSelectionStart(), trackListAdapter.getSelectionEnd());
+                trackListAdapter.clearSelection();
                 animateOutSelectionOptions();
             }
         });
@@ -154,13 +155,12 @@ public class TracksActivity extends SporderActivity {
             }
         });
 
-        trackListAdapter = new TrackAdapter(this,
-                new ArrayList<Pair<Long, Track>>());
         DragListView trackList = (DragListView) findViewById(R.id.trackList);
         trackList.setAdapter(trackListAdapter, false);
         trackList.setLayoutManager(new LinearLayoutManager(this));
         trackList.setCanDragHorizontally(false);
         trackList.setCustomDragItem(new TrackDragItem(this, trackList));
+        trackList.getRecyclerView().setVerticalScrollBarEnabled(true);
         trackList.setDragListCallback(new DragListView.DragListCallback() {
             @Override
             public boolean canDragItemAtPosition(int dragPosition) {
@@ -174,7 +174,6 @@ public class TracksActivity extends SporderActivity {
             }
         });
 
-        final SpotifyService spotify = reorder.getService();
         trackList.setDragListListener(new DragListView.DragListListener() {
             @Override
             public void onItemDragStarted(int position) {
@@ -183,7 +182,7 @@ public class TracksActivity extends SporderActivity {
 
             @Override
             public void onItemDragging(int itemPosition, float x, float y) {
-                
+
             }
 
             @Override
@@ -196,11 +195,41 @@ public class TracksActivity extends SporderActivity {
             }
         });
 
+        trackList.setSwipeListener(new ListSwipeHelper.OnSwipeListenerAdapter() {
+
+            private LinearLayout trashLayout;
+
+            @Override
+            public void onItemSwipeStarted(ListSwipeItem item) {
+                trashLayout = (LinearLayout) item.findViewById(R.id.trashLayout);
+                if(trackListAdapter.hasSelection()){
+                    trackListAdapter.clearSelection();
+                }
+            }
+
+            @Override
+            public void onItemSwipeEnded(ListSwipeItem item, ListSwipeItem.SwipeDirection swipedDirection) {
+                if(swipedDirection == ListSwipeItem.SwipeDirection.LEFT){
+                    Pair<Long, Track> adapterItem = (Pair<Long, Track>) item.getTag();
+                    int position = trackListAdapter.getPositionForItem(adapterItem);
+
+                    dispatchDelete(position, position);
+                }
+            }
+
+            @Override
+            public void onItemSwiping(ListSwipeItem item, float swipedDistanceX) {
+                RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) trashLayout.getLayoutParams();
+                params.width = (int) -swipedDistanceX;
+                trashLayout.setLayoutParams(params);
+            }
+        });
+
         new Thread(new Runnable() {
             @Override
             public void run() {
                 while(shouldThreadRun.get()){
-                    CallbackGroup<SnapshotId> reorderCallback = reorderCalls.peek();
+                    CallbackGroup<SnapshotId> reorderCallback = modificationCalls.peek();
 
                     if(reorderCallback != null){
                         if(reorderCallback.getState() == CallbackGroup.CallbackState.WAITING){
@@ -219,7 +248,7 @@ public class TracksActivity extends SporderActivity {
                                     });
                                 }
                             } else {
-                                reorderCalls.remove();
+                                modificationCalls.remove();
                             }
                         }
                     }
@@ -258,6 +287,7 @@ public class TracksActivity extends SporderActivity {
         if(selectionOptionsMainLayout.getVisibility() == View.VISIBLE){
             animateOutSelectionOptions();
         } else {
+            shouldThreadRun.set(false);
             super.onBackPressed();
         }
     }
@@ -330,7 +360,51 @@ public class TracksActivity extends SporderActivity {
             }
         });
 
-        reorderCalls.add(callbackGroup);
+        modificationCalls.add(callbackGroup);
+    }
+
+    private void dispatchDelete(final int fromPosition, final int toPosition){
+        final TracksToRemoveByPosition tracksToRemoveByPosition = new TracksToRemoveByPosition();
+        tracksToRemoveByPosition.snapshot_id = snapshotId.get();
+        tracksToRemoveByPosition.positions = new ArrayList<>();
+
+        for(int position = fromPosition; position <= toPosition; position++){
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    trackListAdapter.removeItem(fromPosition);
+                }
+            });
+
+            tracksToRemoveByPosition.positions.add(position);
+        }
+
+        CallbackGroup<SnapshotId> callbackGroup = new CallbackGroup<SnapshotId>() {
+            @Override
+            public void onAllFinished() {
+
+            }
+
+            @Override
+            public void callbackExecution(Callback<SnapshotId> callback) {
+                spotify.removeTracksFromPlaylist(reorder.getUser().id, playlistId, tracksToRemoveByPosition, callback);
+            }
+        };
+
+        callbackGroup.addCallback(new SpotifyCallback<SnapshotId>() {
+            @Override
+            public void failure(SpotifyError spotifyError) {
+                Toast.makeText(TracksActivity.this, spotifyError.getMessage(), Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void success(SnapshotId snapshotId, Response response) {
+                TracksActivity.this.snapshotId.set(snapshotId.snapshot_id);
+            }
+
+        });
+
+        modificationCalls.add(callbackGroup);
     }
 
     private void fetchAllPlaylistTracks() {

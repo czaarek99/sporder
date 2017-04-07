@@ -17,17 +17,16 @@
     <string name="Ok">OK</string>
 
     <string name="fetch_playlists_error">
-        Norman is sorry but he couldn\'t find your playlists.
-        He suggests trying to log in again.
+        Norman couldn\'t find your playlists. He recommends trying to log in again.
     </string>
     <string name="fetch_tracks_error">
-        Meow. Seems like norman lost the tracks for this song. He recompensates with a joke:
+        Meow. Seems like norman lost the tracks for this song. So here is a joke instead:
         \nQ: Do you want to hear a bad cat joke?
         \nA: Just kitten.
     </string>
     <string name="modify_playlist_error">
         While Norman was on his way to the spotify servers he lost your changes.
-        He is very sorry but is also fairly sure you can just try again.
+        He is very sorry but he is also fairly sure you can just try again.
     </string>
     <string name="fetch_playlist_info_error">
         Seems like Norman chewed on some important info. You might have to try that again.

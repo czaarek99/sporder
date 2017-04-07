@@ -26,7 +26,6 @@ public final class Util {
     private Util() {
     }
 
-    //TODO: Better error messages
     public static void errorWithFinish(final Activity activity, int stringResId){
         new NormanDialog(activity, stringResId, R.string.Ok, new DialogInterface.OnDismissListener() {
             @Override

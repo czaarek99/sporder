@@ -125,7 +125,6 @@ public class TrackAdapter extends DragItemAdapter<Pair<Long, Track>, TrackAdapte
 
     class TrackViewHolder extends DragItemAdapter.ViewHolder {
         private final TextView trackInfoText;
-        private final LinearLayout textCutOffLayout;
         private final CheckBox checkBox;
         private final ImageView reorderImage;
         private final ImageView settingsImage;
@@ -137,14 +136,9 @@ public class TrackAdapter extends DragItemAdapter<Pair<Long, Track>, TrackAdapte
             trackNameText = (TextView) itemView.findViewById(R.id.trackNameText);
             trackInfoText = (TextView) itemView.findViewById(R.id.trackInfoText);
             checkBox = (CheckBox) itemView.findViewById(R.id.reorderCheckbox);
-            textCutOffLayout = (LinearLayout) itemView.findViewById(R.id.textCutOffLayout);
             reorderImage = (ImageView) itemView.findViewById(R.id.reorderImage);
             mainLayout = (RelativeLayout) itemView.findViewById(R.id.trackRelativeLayout);
             settingsImage = (ImageView) itemView.findViewById(R.id.settingsImage);
-
-            textCutOffLayout.bringToFront();
-            reorderImage.bringToFront();
-            settingsImage.bringToFront();
         }
 
         private boolean isClickable(int position) {
@@ -168,7 +162,11 @@ public class TrackAdapter extends DragItemAdapter<Pair<Long, Track>, TrackAdapte
                 if (hasSelection && getAdapterPosition() != selectionStart) {
                     reorderImage.setVisibility(View.INVISIBLE);
 
-                    if(!isDragging && selectionStart + 1 == getAdapterPosition()){
+                    /*
+                    If the user isn't dragging the settings image should be shown on the element below
+                    If it's the last item in the list show it above instead
+                     */
+                    if(!isDragging && (selectionStart + 1 == getAdapterPosition() || (selectionStart -1 == getAdapterPosition() && selectionStart == getItemCount() - 1))){
                         settingsImage.setVisibility(View.VISIBLE);
                     }
                 } else {

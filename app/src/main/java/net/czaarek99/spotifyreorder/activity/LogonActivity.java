@@ -33,7 +33,6 @@ public class LogonActivity extends SporderActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_logon);
 
-        //TODO: Move this to theme and test all the way down to API level 16
         CalligraphyConfig.initDefault(new CalligraphyConfig.Builder()
                 .setDefaultFontPath("fonts/Montserrat.ttf")
                 .setFontAttrId(R.attr.fontPath)

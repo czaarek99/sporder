@@ -37,6 +37,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.ViewHo
     private List<PlaylistSimple> itemList;
 
     public PlaylistAdapter(Context context, List<PlaylistSimple> list) {
+        setHasStableIds(true);
         this.context = context;
         this.itemList = list;
     }
@@ -51,7 +52,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.ViewHo
     public void onBindViewHolder(ViewHolder holder, int position) {
         PlaylistSimple playlist = itemList.get(position);
         holder.itemView.setTag(itemList.get(position));
-        holder.setPlaylist(playlist);
+        holder.setPlaylist(playlist, position);
     }
 
     @Override
@@ -64,20 +65,23 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.ViewHo
         notifyDataSetChanged();
     }
 
+    @Override
+    public long getItemId(int position) {
+        return itemList.get(position).id.hashCode();
+    }
+
     public void clearImageCache(){
         playlistImages.clear();
         notifyDataSetChanged();
     }
 
-    public void updateCachedImageFor(final PlaylistSimple playlist, final boolean refreshView){
+    public void updateCachedImageFor(final PlaylistSimple playlist){
         if(!queuedImages.contains(playlist.id)){
 
             if(playlist.images.isEmpty()){
                 playlistImages.remove(playlist.id);
 
-                if(refreshView){
-                    notifyDataSetChanged();
-                }
+                notifyDataSetChanged();
             } else {
                 boolean doRefresh = true;
                 if(playlistImages.containsKey(playlist.id)){
@@ -99,9 +103,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.ViewHo
 
                             playlistImages.put(playlist.id, new Pair<>(newImage, bitmap));
                             queuedImages.remove(playlist.id);
-                            if(refreshView){
-                                notifyDataSetChanged();
-                            }
+                            notifyDataSetChanged();
                         }
                     }.execute(newImage.url);
                 }
@@ -122,14 +124,14 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.ViewHo
             playlistAlbumArtImage = (ImageView) itemView.findViewById(R.id.playlistAlbumArt);
         }
 
-        void setPlaylist(final PlaylistSimple playlist){
+        void setPlaylist(final PlaylistSimple playlist, int position){
             playlistNameText.setText(playlist.name);
             playlistTrackCountText.setText(context.getResources().getString(R.string.track_amount, playlist.tracks.total));
 
             if(playlistImages.containsKey(playlist.id)){
                 playlistAlbumArtImage.setImageBitmap(playlistImages.get(playlist.id).second);
             } else if(playlist.images.size() > 0){
-                updateCachedImageFor(playlist, true);
+                updateCachedImageFor(playlist);
             } else {
                 playlistAlbumArtImage.setImageResource(R.drawable.note);
             }
