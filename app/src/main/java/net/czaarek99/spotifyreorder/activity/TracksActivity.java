@@ -2,16 +2,14 @@ package net.czaarek99.spotifyreorder.activity;
 
 import android.graphics.PorterDuff;
 import android.os.Build;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.util.Pair;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -47,36 +45,39 @@ import kaaes.spotify.webapi.android.models.Playlist;
 import kaaes.spotify.webapi.android.models.PlaylistTrack;
 import kaaes.spotify.webapi.android.models.SnapshotId;
 import kaaes.spotify.webapi.android.models.Track;
-import kaaes.spotify.webapi.android.models.TrackToRemoveWithPosition;
 import kaaes.spotify.webapi.android.models.TracksToRemoveByPosition;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
+import xyz.danoz.recyclerviewfastscroller.vertical.VerticalRecyclerViewFastScroller;
 
-//TODO: Make scrollbar thumb a fastscroller: https://github.com/timusus/RecyclerView-FastScroll
+//TODO: Fix dissapearing bug (jonathan)
 //TODO: Auto refresh algorithm
 public class TracksActivity extends SporderActivity {
-
-    private final SpotifyReorder reorder = SpotifyReorder.getInstance();
-    private final SpotifyService spotify = reorder.getService();
 
     private final Queue<CallbackGroup<SnapshotId>> modificationCalls = new ConcurrentLinkedQueue<>();
     private final AtomicBoolean shouldThreadRun = new AtomicBoolean(true);
     private final AtomicReference<String> snapshotId = new AtomicReference<>();
 
+    private SpotifyService spotify;
     private TrackAdapter trackListAdapter;
     private ProgressBarAnimation progressBarAnimation;
     private LinearLayout progressLayout;
     private RelativeLayout selectionOptionsMainLayout;
     private View selectionOptionsDismissView;
+    private FloatingActionButton clearSelectionButton;
     private String playlistId;
-    private String playlistOwnerId;
+    private String playlistName;
+    private String currentUserId;
     private int trackAmount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_songs);
+
+        spotify = getSApplication().getSpotifyService();
+        currentUserId = getSApplication().getSpotifyUserID();
 
         ProgressBar playlistLoadProgress = (ProgressBar) findViewById(R.id.playlistLoadProgress);
         if(Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP){
@@ -87,9 +88,18 @@ public class TracksActivity extends SporderActivity {
         progressLayout = (LinearLayout) findViewById(R.id.playlistProgressLayout);
         selectionOptionsMainLayout = (RelativeLayout) findViewById(R.id.selectionOptionsMainLayout);
         selectionOptionsDismissView = findViewById(R.id.selectionOptionsDismissView);
+        clearSelectionButton = (FloatingActionButton) findViewById(R.id.clearSelectionButton);
+
+        clearSelectionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                trackListAdapter.clearSelection();
+            }
+        });
 
         AdView tracksAdView = (AdView) findViewById(R.id.tracksAd);
         tracksAdView.loadAd(Util.constructSafeAdRequest());
+        setActivityAd(tracksAdView);
 
         trackListAdapter = new TrackAdapter(this, new ArrayList<Pair<Long, Track>>());
 
@@ -160,7 +170,7 @@ public class TracksActivity extends SporderActivity {
         trackList.setLayoutManager(new LinearLayoutManager(this));
         trackList.setCanDragHorizontally(false);
         trackList.setCustomDragItem(new TrackDragItem(this, trackList));
-        trackList.getRecyclerView().setVerticalScrollBarEnabled(true);
+        trackList.getRecyclerView().setVerticalScrollBarEnabled(false);
         trackList.setDragListCallback(new DragListView.DragListCallback() {
             @Override
             public boolean canDragItemAtPosition(int dragPosition) {
@@ -263,14 +273,21 @@ public class TracksActivity extends SporderActivity {
             }
         }).start();
 
+        VerticalRecyclerViewFastScroller fastScroller = (VerticalRecyclerViewFastScroller) findViewById(R.id.tracksFastScroller);
+        fastScroller.setRecyclerView(trackList.getRecyclerView());
+        fastScroller.setTimeout(2000);
+        fastScroller.setScrollAlwaysVisible(false);
+        fastScroller.setFadeOutDuration(250);
+        trackList.getRecyclerView().setOnScrollListener(fastScroller.getOnScrollListener());
+
         Bundle extras = getIntent().getExtras();
         playlistId = extras.getString("playlistId");
+        playlistName = extras.getString("playlistName");
 
-        spotify.getPlaylist(reorder.getUser().id, playlistId, new Callback<Playlist>() {
+        spotify.getPlaylist(currentUserId, playlistId, new Callback<Playlist>() {
             @Override
             public void success(Playlist playlist, Response response) {
                 trackAmount = playlist.tracks.total;
-                playlistOwnerId = playlist.owner.id;
                 snapshotId.set(playlist.snapshot_id);
                 fetchAllPlaylistTracks();
             }
@@ -280,6 +297,9 @@ public class TracksActivity extends SporderActivity {
                 Util.errorWithFinish(TracksActivity.this, R.string.fetch_playlist_info_error);
             }
         });
+
+        TextView playlistNameText = (TextView) findViewById(R.id.playlistNameText);
+        playlistNameText.setText(playlistName);
     }
 
     @Override
@@ -293,10 +313,9 @@ public class TracksActivity extends SporderActivity {
     }
 
     @Override
-    public void finish() {
+    protected void onStop() {
         shouldThreadRun.set(false);
-
-        super.finish();
+        super.onStop();
     }
 
     public void animateInSelectionOptions(){
@@ -307,12 +326,25 @@ public class TracksActivity extends SporderActivity {
         selectionOptionsMainLayout.setVisibility(View.VISIBLE);
     }
 
-    public void animateOutSelectionOptions(){
+    private void animateOutSelectionOptions(){
         selectionOptionsDismissView.setVisibility(View.GONE);
 
         Animation slideOutBottom = AnimationUtils.loadAnimation(this, R.anim.slide_out_bottom);
         selectionOptionsMainLayout.startAnimation(slideOutBottom);
         selectionOptionsMainLayout.setVisibility(View.GONE);
+    }
+
+    public void animateInClearSelectionButton(){
+        clearSelectionButton.setVisibility(View.VISIBLE);
+
+        Animation fadeInAndScale = AnimationUtils.loadAnimation(this, R.anim.floating_button_in);
+        clearSelectionButton.startAnimation(fadeInAndScale);
+    }
+
+    public void animateOutClearSelectionButton(){
+        Animation fadeOutAndScale = AnimationUtils.loadAnimation(this, R.anim.floating_button_out);
+        clearSelectionButton.startAnimation(fadeOutAndScale);
+        clearSelectionButton.setVisibility(View.GONE);
     }
 
     private void dispatchReorder(int fromPosition, int toPosition){
@@ -344,7 +376,7 @@ public class TracksActivity extends SporderActivity {
             @Override
             public void callbackExecution(Callback<SnapshotId> callback) {
                 options.put("snapshot_id", snapshotId.get());
-                spotify.reorderPlaylistTracks(reorder.getUser().id, playlistId, options, callback);
+                spotify.reorderPlaylistTracks(currentUserId, playlistId, options, callback);
             }
         };
 
@@ -387,7 +419,7 @@ public class TracksActivity extends SporderActivity {
 
             @Override
             public void callbackExecution(Callback<SnapshotId> callback) {
-                spotify.removeTracksFromPlaylist(reorder.getUser().id, playlistId, tracksToRemoveByPosition, callback);
+                spotify.removeTracksFromPlaylist(currentUserId, playlistId, tracksToRemoveByPosition, callback);
             }
         };
 
@@ -432,10 +464,14 @@ public class TracksActivity extends SporderActivity {
                 options.put("offset", iteration.getAndIncrement() * TRACKS_PER_REQUEST);
                 options.put("limit", TRACKS_PER_REQUEST);
 
-                spotify.getPlaylistTracks(playlistOwnerId, playlistId, options, callback);
+                spotify.getPlaylistTracks(currentUserId, playlistId, options, callback);
 
             }
         };
+
+        if(neededRequests == 0){
+            Util.collapseView(progressLayout, 1000);
+        }
 
         for (int i = 0; i < neededRequests; i++) {
             callbackGroup.addCallback(new Callback<Pager<PlaylistTrack>>() {

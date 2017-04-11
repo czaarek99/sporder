@@ -8,15 +8,15 @@
         <item name="colorPrimary">@color/glueGreen</item>
         <item name="colorPrimaryDark">@color/glueGreenDark</item>
         <item name="colorAccent">@color/colorAccent</item>
-        <item name="android:colorBackground">@android:color/background_dark</item>
+        <item name="android:colorBackground">@color/backgroundBlack</item>
         <item name="android:colorForeground">@color/white</item>
         <item name="android:textColorPrimary">@color/white</item>
-        <item name="android:statusBarColor">@color/statusBarColor</item>
+        <item name="android:statusBarColor">@color/statusbarBlack</item>
         <item name="android:colorPrimary">@color/glueGreen</item>
         <item name="android:colorPrimaryDark">@color/glueGreenDark</item>
         <item name="android:colorAccent">@color/white</item>
         <item name="android:navigationBarColor">@color/glueGreen</item>
-        <item name="android:windowBackground">@android:color/black</item>
+        <item name="android:windowBackground">@color/backgroundBlack</item>
         <item name="android:buttonStyle">@style/SpotifyTheme.Button</item>
         <item name="buttonStyle">@style/SpotifyTheme.Button</item>
     </style>

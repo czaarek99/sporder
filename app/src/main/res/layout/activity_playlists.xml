@@ -20,6 +20,41 @@
         ads:layout_constraintBottom_toBottomOf="parent"
         android:layout_marginBottom="0dp">
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <!-- Dummy view until we add something real here-->
+            <View
+                android:layout_width="30dp"
+                android:layout_height="0dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginStart="10dp"
+                />
+
+            <include
+                android:id="@+id/playlistsTitleText"
+                layout="@layout/title_textview"
+
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                />
+
+            <ImageView
+                android:id="@+id/settingsImage"
+                android:layout_width="30dp"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="10dp"
+                android:layout_marginRight="10dp"
+                android:contentDescription="@string/settings"
+                ads:srcCompat="@drawable/settings" />
+
+        </LinearLayout>
+
+
+
         <android.support.v4.widget.NestedScrollView
             android:id="@+id/playlistScrollView"
             android:layout_width="match_parent"
@@ -65,6 +100,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="#00000000"
+            android:visibility="visible"
             ads:adSize="BANNER"
             ads:adUnitId="@string/playlists_ad_id" />
 

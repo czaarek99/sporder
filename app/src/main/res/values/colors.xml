@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="glueGreen">#ff1db854</color>
-    <color name="glueGreenDark">#ff1da64d</color>
+    <color name="glueGreenDark">#1da64d</color>
     <color name="glueGreenLight">#ff1ed560</color>
     <color name="colorAccent">#1db954</color>
     <color name="foreground_material_light">#ffffff</color>
     <color name="primary_text_material_light">#ffffff</color>
-    <color name="statusBarColor">#169744</color>
 
-    <color name="translucentBlack">#ca000000</color>
+    <color name="statusbarBlack">#080809</color>
+    <color name="translucentBlack">#d8121314</color>
+    <color name="backgroundBlack">#121314</color>
     <color name="white">#ffffff</color>
 
 </resources>

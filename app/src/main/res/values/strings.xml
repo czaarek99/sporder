@@ -2,6 +2,8 @@
     <string name="app_name">Sporder</string>
     <string name="log_in">Log in</string>
     <string name="track_amount">%1$d Tracks</string>
+    <string name="playlists">Playlists</string>
+    <string name="settings">Settings</string>
     <string name="loading_playlist">Loading playlist tracks…</string>
     <string name="remove_selection">Clear selection</string>
     <string name="send_to_bottom">Send to bottom</string>
@@ -11,6 +13,7 @@
     <string name="reorder_image_description">Change playlist order</string>
     <string name="selection_settings_image_description">Options for selection</string>
     <string name="error">Error</string>
+    <string name="remove_ads">Remove Ads</string>
 
     <string name="playlists_ad_id">ca-app-pub-7701342036796677/1382826148</string>
     <string name="tracks_ad_id">ca-app-pub-7701342036796677/4805467341</string>
@@ -36,6 +39,9 @@
     </string>
     <string name="log_in_error">
         They didn\'t let Norman into the spotify building! Try logging in again.
+    </string>
+    <string name="auth_token_error">
+        Norman is sorry to say but your session has expired. Please log in again.
     </string>
 
 </resources>

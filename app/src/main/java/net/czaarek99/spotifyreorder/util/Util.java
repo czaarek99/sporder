@@ -17,6 +17,9 @@ import com.google.android.gms.ads.AdRequest;
 import net.com.spotifyreorder.R;
 import net.czaarek99.spotifyreorder.activity.TracksActivity;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+
 /**
  * Created by Czarek on 2017-03-19.
  */
@@ -49,12 +52,8 @@ public final class Util {
         {
             @Override
             protected void applyTransformation(float interpolatedTime, Transformation t) {
-                if(interpolatedTime == 1){
-                    view.setVisibility(View.GONE);
-                }else{
-                    view.getLayoutParams().height = initialHeight - (int)(initialHeight * interpolatedTime);
-                    view.requestLayout();
-                }
+                view.getLayoutParams().height = initialHeight - (int)(initialHeight * interpolatedTime);
+                view.requestLayout();
             }
 
             @Override

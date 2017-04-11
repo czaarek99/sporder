@@ -2,69 +2,101 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:recyclerviewfastscroller="http://schemas.android.com/apk/res-auto"
     xmlns:ads="http://schemas.android.com/apk/res-auto"
     xmlns:custom="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     >
 
+    <include
+        android:id="@+id/playlistNameText"
+        layout="@layout/title_textview"
+        />
+
     <LinearLayout
-        android:id="@+id/mainTrackLayout"
+        android:id="@+id/playlistProgressLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginBottom="0dp"
+        android:layout_height="wrap_content"
         android:orientation="vertical"
-        tools:context="net.czaarek99.spotifyreorder.activity.TracksActivity">
+        android:layout_below="@id/playlistNameText"
+        >
 
-        <LinearLayout
-            android:id="@+id/playlistProgressLayout"
+        <TextView
+            android:id="@+id/loadingPlaylistText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:text="@string/loading_playlist"
+            android:gravity="center"
+            android:textAppearance="@android:style/TextAppearance.Large" />
 
-            <TextView
-                android:id="@+id/loadingPlaylistText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/loading_playlist"
-                android:gravity="center"
-                android:textAppearance="@android:style/TextAppearance.Large" />
-
-            <ProgressBar
-                android:id="@+id/playlistLoadProgress"
-                style="@style/Widget.AppCompat.ProgressBar.Horizontal"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:indeterminate="false"
-                android:max="100"
-                android:progress="0" />
-        </LinearLayout>
-
-        <FrameLayout
+        <ProgressBar
+            android:id="@+id/playlistLoadProgress"
+            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:id="@+id/trackListContainer"
-            >
-
-            <com.woxthebox.draglistview.DragListView
-                android:id="@+id/trackList"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                custom:recyclerLayout="@layout/tracks_recycler"
-                />
-
-        </FrameLayout>
-
-
-        <com.google.android.gms.ads.AdView
-            android:id="@+id/tracksAd"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="#00000000"
-            ads:adSize="BANNER"
-            ads:adUnitId="@string/tracks_ad_id" />
+            android:layout_height="match_parent"
+            android:indeterminate="false"
+            android:max="100"
+            android:progress="0" />
     </LinearLayout>
+
+
+    <com.woxthebox.draglistview.DragListView
+        android:id="@+id/trackList"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        custom:recyclerLayout="@layout/tracks_recycler"
+        android:layout_marginRight="15dp"
+        android:layout_marginEnd="15dp"
+        android:layout_above="@+id/tracksAd"
+        android:layout_below="@id/playlistProgressLayout"
+        >
+
+    </com.woxthebox.draglistview.DragListView>
+
+
+    <com.google.android.gms.ads.AdView
+        android:id="@id/tracksAd"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#00000000"
+        ads:adSize="BANNER"
+        ads:adUnitId="@string/tracks_ad_id"
+        android:layout_alignParentBottom="true"
+        />
+
+
+    <xyz.danoz.recyclerviewfastscroller.vertical.VerticalRecyclerViewFastScroller
+        android:id="@+id/tracksFastScroller"
+        android:layout_width="5dp"
+        android:layout_height="match_parent"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignTop="@id/trackList"
+        android:layout_alignBottom="@id/trackList"
+        android:layout_marginRight="5dp"
+        android:layout_marginEnd="5dp"
+        recyclerviewfastscroller:rfs_barBackground="@android:color/transparent"
+        recyclerviewfastscroller:rfs_handleColor="@android:color/transparent"
+        recyclerviewfastscroller:rfs_handleBackground="@drawable/green_scrollbar"
+        recyclerviewfastscroller:rfs_handleWidth="9dp"
+        />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/clearSelectionButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/tracksAd"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginBottom="25dp"
+        android:layout_marginRight="25dp"
+        android:layout_marginEnd="25dp"
+        android:clickable="true"
+        android:visibility="gone"
+        ads:fabSize="mini"
+        ads:srcCompat="@drawable/close"
+        recyclerviewfastscroller:elevation="0dp" />
 
     <RelativeLayout
         android:id="@+id/selectionOptionsMainLayout"
@@ -85,7 +117,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:background="#f3000000"
+            android:background="@color/translucentBlack"
             android:visibility="visible">
 
 

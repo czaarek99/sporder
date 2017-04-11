@@ -1,5 +1,6 @@
 package net.czaarek99.spotifyreorder.activity;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -11,7 +12,13 @@ import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
 
 import net.com.spotifyreorder.R;
+import net.czaarek99.spotifyreorder.SporderApplication;
 import net.czaarek99.spotifyreorder.util.NormanDialog;
+
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.UserPrivate;
@@ -24,53 +31,85 @@ import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 public class LogonActivity extends SporderActivity {
 
     private static final String CLIENT_ID = "ec7df65dbcf5446eb32cd5d10d5e7be3";
-    private static final int REQUEST_CODE = 1337;
+    private static final int SPOTIFY_AUTH_REQUEST_CODE = 1000;
 
-    private final SpotifyReorder reorder = SpotifyReorder.getInstance();
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    private final AtomicBoolean runSessionChecks = new AtomicBoolean();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_logon);
 
+        SporderApplication sporderApplication = getSApplication();
+
         CalligraphyConfig.initDefault(new CalligraphyConfig.Builder()
-                .setDefaultFontPath("fonts/Montserrat.ttf")
+                .setDefaultFontPath("fonts/CircularStd-Book.otf")
                 .setFontAttrId(R.attr.fontPath)
                 .build());
 
         String appId = "ca-app-pub-7701342036796677~8906092947";
         MobileAds.initialize(getApplicationContext(), appId);
 
-        attemptAuthentication();
+        attemptAuthentication(SPOTIFY_AUTH_REQUEST_CODE);
 
         Button loginButton = (Button) findViewById(R.id.loginButton);
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                attemptAuthentication();
+                attemptAuthentication(SPOTIFY_AUTH_REQUEST_CODE);
             }
         });
+
+        scheduler.scheduleAtFixedRate(new Runnable() {
+            @Override
+            public void run() {
+                if(runSessionChecks.get()) {
+                    getSApplication().getSpotifyService().getMe(new Callback<UserPrivate>() {
+                        @Override
+                        public void success(UserPrivate userPrivate, Response response) {
+
+                        }
+
+                        @Override
+                        public void failure(RetrofitError error) {
+                            if (error.getResponse().getStatus() == 401) {
+                                runSessionChecks.set(false);
+                                new NormanDialog(currentActivity.get(), R.string.auth_token_error, R.string.Ok, new DialogInterface.OnDismissListener() {
+                                    @Override
+                                    public void onDismiss(DialogInterface dialog) {
+                                        Intent intent = new Intent(getApplicationContext(), LogonActivity.class);
+                                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                        startActivity(intent);
+                                    }
+                                }).show();
+                            }
+                        }
+                    });
+                }
+            }
+        }, 10, 10, TimeUnit.SECONDS);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if(requestCode == REQUEST_CODE){
+        if(requestCode == SPOTIFY_AUTH_REQUEST_CODE){
             AuthenticationResponse response = AuthenticationClient.getResponse(resultCode, data);
-
             AuthenticationResponse.Type responseType = response.getType();
-            if(responseType == AuthenticationResponse.Type.TOKEN){
-                reorder.setAccessToken(response.getAccessToken());
 
+            if(responseType == AuthenticationResponse.Type.TOKEN){
+                getSApplication().setAccessToken(response.getAccessToken());
                 fetchUser();
+                runSessionChecks.set(true);
             } else if(responseType == AuthenticationResponse.Type.ERROR){
                 new NormanDialog(LogonActivity.this, R.string.log_in_error, R.string.Ok, null).show();
             }
         }
     }
 
-    private void attemptAuthentication(){
+    private void attemptAuthentication(int requestCode){
         AuthenticationRequest request = new AuthenticationRequest.Builder(CLIENT_ID, AuthenticationResponse.Type.TOKEN, "reorder://callback")
                 .setScopes(new String[]{
                         "playlist-read-private",
@@ -80,16 +119,16 @@ public class LogonActivity extends SporderActivity {
                 })
                 .build();
 
-        AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request);
+        AuthenticationClient.openLoginActivity(this, requestCode, request);
     }
 
     private void fetchUser(){
-        final SpotifyService spotifyService = reorder.getService();
+        final SpotifyService spotifyService = getSApplication().getSpotifyService();
 
         spotifyService.getMe(new Callback<UserPrivate>() {
             @Override
             public void success(UserPrivate userPrivate, Response response) {
-                reorder.setSpotifyUser(userPrivate);
+                getSApplication().setSpotifyUser(userPrivate);
                 Intent intent = new Intent(getApplicationContext(), PlaylistsActivity.class);
                 startActivity(intent);
             }

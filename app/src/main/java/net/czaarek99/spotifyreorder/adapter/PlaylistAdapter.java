@@ -3,6 +3,7 @@ package net.czaarek99.spotifyreorder.adapter;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.support.v4.util.Pair;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -12,15 +13,18 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import net.com.spotifyreorder.R;
+import net.czaarek99.spotifyreorder.activity.PlaylistsActivity;
 import net.czaarek99.spotifyreorder.activity.TracksActivity;
-import net.czaarek99.spotifyreorder.util.DownloadImageTask;
 
-import java.util.Collections;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import kaaes.spotify.webapi.android.models.Image;
 import kaaes.spotify.webapi.android.models.PlaylistSimple;
@@ -31,15 +35,47 @@ import kaaes.spotify.webapi.android.models.PlaylistSimple;
 
 public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.ViewHolder> {
 
+    private static final int IMAGE_DOWNLOAD_THREADS = 5;
+
+    private final BlockingQueue<PlaylistSimple> queuedPlaylistsToRefresh = new LinkedBlockingQueue<>();
     private final Map<String, Pair<Image, Bitmap>> playlistImages = new HashMap<>();
-    private final Set<String> queuedImages = Collections.synchronizedSet(new HashSet<String>());
-    private final Context context;
+    private final AtomicBoolean runImageThreads = new AtomicBoolean(true);
+    private final PlaylistsActivity activity;
     private List<PlaylistSimple> itemList;
 
-    public PlaylistAdapter(Context context, List<PlaylistSimple> list) {
+    public PlaylistAdapter(final PlaylistsActivity activity, List<PlaylistSimple> list) {
         setHasStableIds(true);
-        this.context = context;
+        this.activity = activity;
         this.itemList = list;
+
+        for(int threadId = 0; threadId < IMAGE_DOWNLOAD_THREADS; threadId++){
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        while(runImageThreads.get()){
+                            PlaylistSimple playlistSimple = queuedPlaylistsToRefresh.poll(5, TimeUnit.SECONDS);
+
+                            if(playlistSimple != null){
+                                Image image = playlistSimple.images.get(0);
+                                InputStream in = new URL(image.url).openStream();
+                                Bitmap bitmap = BitmapFactory.decodeStream(in);
+
+                                playlistImages.put(playlistSimple.id, new Pair<>(image, bitmap));
+                                activity.runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        notifyDataSetChanged();
+                                    }
+                                });
+                            }
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }).start();
+        }
     }
 
     @Override
@@ -52,7 +88,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.ViewHo
     public void onBindViewHolder(ViewHolder holder, int position) {
         PlaylistSimple playlist = itemList.get(position);
         holder.itemView.setTag(itemList.get(position));
-        holder.setPlaylist(playlist, position);
+        holder.setPlaylist(playlist);
     }
 
     @Override
@@ -70,43 +106,29 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.ViewHo
         return itemList.get(position).id.hashCode();
     }
 
-    public void clearImageCache(){
-        playlistImages.clear();
-        notifyDataSetChanged();
+    public void killImageThreads(){
+        runImageThreads.set(false);
     }
 
     public void updateCachedImageFor(final PlaylistSimple playlist){
-        if(!queuedImages.contains(playlist.id)){
+        if(playlist.images.isEmpty()){
+            playlistImages.remove(playlist.id);
 
-            if(playlist.images.isEmpty()){
-                playlistImages.remove(playlist.id);
+            notifyDataSetChanged();
+        } else {
+            boolean doRefresh = true;
+            if(playlistImages.containsKey(playlist.id)){
+                String prevImageUrl = playlistImages.get(playlist.id).first.url;
+                String newImageUrl = playlist.images.get(0).url;
 
-                notifyDataSetChanged();
-            } else {
-                boolean doRefresh = true;
-                if(playlistImages.containsKey(playlist.id)){
-                    String prevImageUrl = playlistImages.get(playlist.id).first.url;
-                    String newImageUrl = playlist.images.get(0).url;
-
-                    if(prevImageUrl.equals(newImageUrl)){
-                        doRefresh = false;
-                    }
-
+                if(prevImageUrl.equals(newImageUrl)){
+                    doRefresh = false;
                 }
 
-                if(doRefresh){
-                    queuedImages.add(playlist.id);
-                    final Image newImage = playlist.images.get(0);
-                    new DownloadImageTask(){
-                        @Override
-                        protected void onPostExecute(Bitmap bitmap) {
+            }
 
-                            playlistImages.put(playlist.id, new Pair<>(newImage, bitmap));
-                            queuedImages.remove(playlist.id);
-                            notifyDataSetChanged();
-                        }
-                    }.execute(newImage.url);
-                }
+            if(doRefresh){
+                queuedPlaylistsToRefresh.add(playlist);
             }
         }
     }
@@ -124,9 +146,9 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.ViewHo
             playlistAlbumArtImage = (ImageView) itemView.findViewById(R.id.playlistAlbumArt);
         }
 
-        void setPlaylist(final PlaylistSimple playlist, int position){
+        void setPlaylist(final PlaylistSimple playlist){
             playlistNameText.setText(playlist.name);
-            playlistTrackCountText.setText(context.getResources().getString(R.string.track_amount, playlist.tracks.total));
+            playlistTrackCountText.setText(activity.getResources().getString(R.string.track_amount, playlist.tracks.total));
 
             if(playlistImages.containsKey(playlist.id)){
                 playlistAlbumArtImage.setImageBitmap(playlistImages.get(playlist.id).second);
@@ -141,6 +163,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.ViewHo
                 public void onClick(View v) {
                     Intent intent = new Intent(itemView.getContext(), TracksActivity.class);
                     intent.putExtra("playlistId", playlist.id);
+                    intent.putExtra("playlistName", playlist.name);
                     itemView.getContext().startActivity(intent);
                 }
             });

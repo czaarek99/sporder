@@ -87,6 +87,8 @@ public class TrackAdapter extends DragItemAdapter<Pair<Long, Track>, TrackAdapte
     }
 
     public void clearSelection(){
+        tracksActivity.animateOutClearSelectionButton();
+
         hasSelection = false;
         selectionStart = -1;
         selectionEnd = -1;
@@ -223,7 +225,9 @@ public class TrackAdapter extends DragItemAdapter<Pair<Long, Track>, TrackAdapte
                                 if (hasSelection) {
                                     selectionEnd = position;
                                     notifyItemChanged(position + 1);
+                                    notifyItemChanged(position);
                                 } else {
+                                    tracksActivity.animateInClearSelectionButton();
                                     hasSelection = true;
                                     selectionStart = position;
                                     selectionEnd = position;
