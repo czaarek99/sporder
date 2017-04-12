@@ -6,7 +6,9 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="8dp">
+    android:paddingTop="4dp"
+    android:paddingBottom="4dp"
+    android:background="@drawable/background_press_darker">
 
     <LinearLayout
         android:id="@+id/playlistLayout"

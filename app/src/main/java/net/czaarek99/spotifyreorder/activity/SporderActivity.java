@@ -31,6 +31,7 @@ public abstract class SporderActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        updateAdVisibility();
     }
 
     @Override
@@ -66,7 +67,7 @@ public abstract class SporderActivity extends AppCompatActivity {
     }
 
     private void updateAdVisibility(){
-        if(!getSApplication().areAdsEnabled()){
+        if(!getSApplication().areAdsEnabled() && activityAd != null){
             activityAd.getLayoutParams().height = 1;
             activityAd.setVisibility(View.INVISIBLE);
         }

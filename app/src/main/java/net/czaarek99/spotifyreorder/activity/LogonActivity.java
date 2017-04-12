@@ -41,8 +41,6 @@ public class LogonActivity extends SporderActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_logon);
 
-        SporderApplication sporderApplication = getSApplication();
-
         CalligraphyConfig.initDefault(new CalligraphyConfig.Builder()
                 .setDefaultFontPath("fonts/CircularStd-Book.otf")
                 .setFontAttrId(R.attr.fontPath)

@@ -12,6 +12,9 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+
 import net.com.spotifyreorder.R;
 import net.czaarek99.spotifyreorder.activity.PlaylistsActivity;
 import net.czaarek99.spotifyreorder.activity.TracksActivity;
@@ -35,10 +38,6 @@ import kaaes.spotify.webapi.android.models.PlaylistSimple;
 
 public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.ViewHolder> {
 
-    private static final int IMAGE_DOWNLOAD_THREADS = 5;
-
-    private final BlockingQueue<PlaylistSimple> queuedPlaylistsToRefresh = new LinkedBlockingQueue<>();
-    private final Map<String, Pair<Image, Bitmap>> playlistImages = new HashMap<>();
     private final AtomicBoolean runImageThreads = new AtomicBoolean(true);
     private final PlaylistsActivity activity;
     private List<PlaylistSimple> itemList;
@@ -47,35 +46,6 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.ViewHo
         setHasStableIds(true);
         this.activity = activity;
         this.itemList = list;
-
-        for(int threadId = 0; threadId < IMAGE_DOWNLOAD_THREADS; threadId++){
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        while(runImageThreads.get()){
-                            PlaylistSimple playlistSimple = queuedPlaylistsToRefresh.poll(5, TimeUnit.SECONDS);
-
-                            if(playlistSimple != null){
-                                Image image = playlistSimple.images.get(0);
-                                InputStream in = new URL(image.url).openStream();
-                                Bitmap bitmap = BitmapFactory.decodeStream(in);
-
-                                playlistImages.put(playlistSimple.id, new Pair<>(image, bitmap));
-                                activity.runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        notifyDataSetChanged();
-                                    }
-                                });
-                            }
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            }).start();
-        }
     }
 
     @Override
@@ -110,29 +80,6 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.ViewHo
         runImageThreads.set(false);
     }
 
-    public void updateCachedImageFor(final PlaylistSimple playlist){
-        if(playlist.images.isEmpty()){
-            playlistImages.remove(playlist.id);
-
-            notifyDataSetChanged();
-        } else {
-            boolean doRefresh = true;
-            if(playlistImages.containsKey(playlist.id)){
-                String prevImageUrl = playlistImages.get(playlist.id).first.url;
-                String newImageUrl = playlist.images.get(0).url;
-
-                if(prevImageUrl.equals(newImageUrl)){
-                    doRefresh = false;
-                }
-
-            }
-
-            if(doRefresh){
-                queuedPlaylistsToRefresh.add(playlist);
-            }
-        }
-    }
-
     class ViewHolder extends RecyclerView.ViewHolder {
 
         private final TextView playlistNameText;
@@ -150,10 +97,13 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.ViewHo
             playlistNameText.setText(playlist.name);
             playlistTrackCountText.setText(activity.getResources().getString(R.string.track_amount, playlist.tracks.total));
 
-            if(playlistImages.containsKey(playlist.id)){
-                playlistAlbumArtImage.setImageBitmap(playlistImages.get(playlist.id).second);
-            } else if(playlist.images.size() > 0){
-                updateCachedImageFor(playlist);
+            if(playlist.images.size() > 0){
+                Glide.with(activity)
+                        .load(playlist.images.get(0).url)
+                        .placeholder(R.drawable.note)
+                        .crossFade()
+                        .diskCacheStrategy(DiskCacheStrategy.RESULT)
+                        .into(playlistAlbumArtImage);
             } else {
                 playlistAlbumArtImage.setImageResource(R.drawable.note);
             }

@@ -52,11 +52,11 @@ public class TrackAdapter extends DragItemAdapter<Pair<Long, Track>, TrackAdapte
         Pair<Long, Track> entry = mItemList.get(position);
         Track track = entry.second;
         holder.setTrack(track);
-        holder.itemView.setTag(entry);
+        holder.itemView.setTag(holder);
 
+        holder.initImage();
         holder.initCheckbox(entry.first);
         holder.determineVisibility(entry.first);
-        holder.initImage();
     }
 
     @Override
@@ -96,10 +96,6 @@ public class TrackAdapter extends DragItemAdapter<Pair<Long, Track>, TrackAdapte
         notifyDataSetChanged();
     }
 
-    public List<Long> getCheckedBoxes(){
-        return checkedBoxes;
-    }
-
     public int getSelectionSize() {
         return selectionEnd - selectionStart + 1;
     }
@@ -125,13 +121,14 @@ public class TrackAdapter extends DragItemAdapter<Pair<Long, Track>, TrackAdapte
         }
     }
 
-    class TrackViewHolder extends DragItemAdapter.ViewHolder {
+    public class TrackViewHolder extends DragItemAdapter.ViewHolder {
         private final TextView trackInfoText;
-        private final CheckBox checkBox;
         private final ImageView reorderImage;
         private final ImageView settingsImage;
-        private final RelativeLayout mainLayout;
         private final TextView trackNameText;
+
+        public final CheckBox checkBox;
+        public final RelativeLayout mainLayout;
 
         TrackViewHolder(final View itemView) {
             super(itemView, R.id.reorderImage, false);
@@ -148,12 +145,10 @@ public class TrackAdapter extends DragItemAdapter<Pair<Long, Track>, TrackAdapte
         }
 
         void determineVisibility(final long id){
-            if(hasSelection()){
-                if(checkedBoxes.contains(id) && isDragging){
-                    mainLayout.setVisibility(View.INVISIBLE);
-                } else {
-                    mainLayout.setVisibility(View.VISIBLE);
-                }
+            mainLayout.setVisibility(View.VISIBLE);
+
+            if(hasSelection() && checkedBoxes.contains(id) && isDragging){
+                mainLayout.setVisibility(View.INVISIBLE);
             }
         }
 

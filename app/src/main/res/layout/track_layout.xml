@@ -45,8 +45,7 @@
         android:id="@id/trackRelativeLayout"
         android:layout_width="match_parent"
         android:layout_height="60dp"
-        android:background="@color/translucentBlack"
-        android:orientation="vertical">
+        android:background="@color/translucentBlack">
 
         <LinearLayout
             android:id="@+id/trackLayout"
@@ -97,10 +96,10 @@
             android:id="@+id/textCutOffLayout"
             android:layout_width="50dp"
             android:layout_height="match_parent"
-            android:layout_alignBottom="@+id/trackLayout"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentTop="true"
             android:layout_alignEnd="@+id/reorderImage"
             android:layout_alignRight="@+id/reorderImage"
-            android:layout_alignTop="@+id/trackLayout"
             android:width="30dp"
             android:orientation="horizontal">
 

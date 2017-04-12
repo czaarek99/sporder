@@ -9,7 +9,9 @@
 
     <color name="statusbarBlack">#080809</color>
     <color name="translucentBlack">#d8121314</color>
+    <color name="translucentBlackLight">#d6212325</color>
     <color name="backgroundBlack">#121314</color>
+    <color name="backgroundBlackDark">#0f0f10</color>
     <color name="white">#ffffff</color>
 
 </resources>

@@ -18,6 +18,7 @@ import net.czaarek99.spotifyreorder.SporderApplication;
  * Created by Czarek on 2017-04-11.
  */
 
+//TODO: Finish integration of in app purchase to remove ads
 public class SettingsActivity extends SporderActivity {
 
     private static final int REMOVE_ADS_REQUEST_CODE = 1002;

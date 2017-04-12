@@ -7,6 +7,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.ads.AdView;
 
@@ -84,11 +85,6 @@ public class PlaylistsActivity extends SporderActivity {
                             @Override
                             public void onSuccess(List<PlaylistSimple> playlists) {
                                 //Toast.makeText(PlaylistsActivity.this, "Updated playlists", Toast.LENGTH_LONG).show();
-                                for (PlaylistSimple playlist : playlists) {
-                                    playlistAdapter.updateCachedImageFor(playlist);
-                                }
-
-                                playlistAdapter.notifyDataSetChanged();
                                 playlistAdapter.setItemList(playlists);
                             }
                         }, new PlaylistFetchCallback());
