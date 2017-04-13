@@ -10,6 +10,5 @@
         <shape>
             <solid android:color="@color/backgroundBlack"/>
         </shape>
-
     </item>
 </selector>

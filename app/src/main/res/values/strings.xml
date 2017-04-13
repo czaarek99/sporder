@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">Sporder</string>
     <string name="log_in">Log in</string>
+    <string name="log_out">Log out</string>
     <string name="track_amount">%1$d Tracks</string>
     <string name="playlists">Playlists</string>
     <string name="settings">Settings</string>
@@ -14,6 +15,7 @@
     <string name="selection_settings_image_description">Options for selection</string>
     <string name="error">Error</string>
     <string name="remove_ads">Remove Ads</string>
+    <string name="ads_removed">Ads have been removed.</string>
 
     <string name="playlists_ad_id">ca-app-pub-7701342036796677/1382826148</string>
     <string name="tracks_ad_id">ca-app-pub-7701342036796677/4805467341</string>
@@ -43,5 +45,7 @@
     <string name="auth_token_error">
         Norman is sorry to say but your session has expired. Please log in again.
     </string>
-
+    <string name="billing_failed_error">
+        Norman was unable to contact google play. Try again later.
+    </string>
 </resources>

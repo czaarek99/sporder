@@ -15,11 +15,21 @@
         android:name="net.czaarek99.spotifyreorder.SporderApplication"
         >
         <activity
-            android:name="net.czaarek99.spotifyreorder.activity.LogonActivity">
+            android:name="net.czaarek99.spotifyreorder.activity.LogonActivity"
+            android:launchMode="singleTask"
+            android:exported="true"
+            >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="reorder" android:host="callback" />
             </intent-filter>
         </activity>
         <activity

@@ -51,7 +51,6 @@ import retrofit.RetrofitError;
 import retrofit.client.Response;
 import xyz.danoz.recyclerviewfastscroller.vertical.VerticalRecyclerViewFastScroller;
 
-//TODO: Fix dissapearing bug (jonathan)
 //TODO: Auto refresh algorithm
 public class TracksActivity extends SporderActivity {
 
@@ -366,7 +365,6 @@ public class TracksActivity extends SporderActivity {
             options.put("range_start", fromPosition);
         }
 
-        //TODO: Client scope issue?
         CallbackGroup<SnapshotId> callbackGroup = new CallbackGroup<SnapshotId>() {
             @Override
             public void onAllFinished() {

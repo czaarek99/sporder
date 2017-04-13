@@ -11,17 +11,22 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.TextView;
 
+import com.android.vending.billing.IInAppBillingService;
+
 import net.com.spotifyreorder.R;
 import net.czaarek99.spotifyreorder.SporderApplication;
+import net.czaarek99.spotifyreorder.util.NormanDialog;
+import net.czaarek99.spotifyreorder.util.Util;
 
 /**
  * Created by Czarek on 2017-04-11.
  */
 
-//TODO: Finish integration of in app purchase to remove ads
 public class SettingsActivity extends SporderActivity {
 
     private static final int REMOVE_ADS_REQUEST_CODE = 1002;
+
+    private TextView removeAdsText;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -31,21 +36,35 @@ public class SettingsActivity extends SporderActivity {
         TextView settingsTitleText = (TextView) findViewById(R.id.settingsTitle);
         settingsTitleText.setText(R.string.settings);
 
-        TextView removeAdsText = (TextView) findViewById(R.id.removeAdsText);
-        removeAdsText.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                try {
-                    Bundle buyIntentBundle = getSApplication().getBillingService().getBuyIntent(3, getPackageName(),
-                            SporderApplication.REMOVE_ADS_SKU, "inapp", "");
+        removeAdsText = (TextView) findViewById(R.id.removeAdsText);
 
-                    PendingIntent pendingIntent = buyIntentBundle.getParcelable("BUY_INTENT");
-                    startIntentSenderForResult(pendingIntent.getIntentSender(), REMOVE_ADS_REQUEST_CODE, new Intent(), 0, 0, 0);
-                } catch (RemoteException | IntentSender.SendIntentException e) {
-                    e.printStackTrace();
+        if(getSApplication().areAdsEnabled()){
+            removeAdsText.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    try {
+                        IInAppBillingService billingService = getSApplication().getBillingService();
+
+                        if(billingService == null){
+                            Util.errorWithFinish(SettingsActivity.this, R.string.billing_failed_error);
+                        } else {
+                            Bundle buyIntentBundle = billingService.getBuyIntent(3, getPackageName(),
+                                    SporderApplication.REMOVE_ADS_SKU, "inapp", "");
+
+                            PendingIntent pendingIntent = buyIntentBundle.getParcelable("BUY_INTENT");
+                            startIntentSenderForResult(pendingIntent.getIntentSender(), REMOVE_ADS_REQUEST_CODE, new Intent(), 0, 0, 0);
+                        }
+
+                    } catch (RemoteException | IntentSender.SendIntentException e) {
+                        e.printStackTrace();
+                    }
                 }
-            }
-        });
+            });
+        } else {
+            removeAdsText.setText(R.string.ads_removed);
+        }
+
+
     }
 
     @Override
@@ -54,6 +73,7 @@ public class SettingsActivity extends SporderActivity {
 
         if(requestCode == REMOVE_ADS_REQUEST_CODE && resultCode == RESULT_OK){
             getSApplication().disableAds();
+            removeAdsText.setText(R.string.ads_removed);
         }
     }
 }

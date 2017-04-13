@@ -26,11 +26,15 @@
             android:orientation="horizontal">
 
             <!-- Dummy view until we add something real here-->
-            <View
+            <ImageView
+                android:id="@+id/logoutImage"
                 android:layout_width="30dp"
-                android:layout_height="0dp"
+                android:layout_height="match_parent"
                 android:layout_marginLeft="10dp"
                 android:layout_marginStart="10dp"
+                app:srcCompat="@drawable/logout"
+                android:rotation="180"
+                android:contentDescription="@string/log_out"
                 />
 
             <include
@@ -49,7 +53,7 @@
                 android:layout_marginEnd="10dp"
                 android:layout_marginRight="10dp"
                 android:contentDescription="@string/settings"
-                ads:srcCompat="@drawable/settings" />
+                app:srcCompat="@drawable/settings" />
 
         </LinearLayout>
 

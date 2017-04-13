@@ -15,7 +15,7 @@
         <item name="android:colorPrimary">@color/glueGreen</item>
         <item name="android:colorPrimaryDark">@color/glueGreenDark</item>
         <item name="android:colorAccent">@color/white</item>
-        <item name="android:navigationBarColor">@color/glueGreen</item>
+        <item name="android:navigationBarColor">@color/backgroundBlack</item>
         <item name="android:windowBackground">@color/backgroundBlack</item>
         <item name="android:buttonStyle">@style/SpotifyTheme.Button</item>
         <item name="buttonStyle">@style/SpotifyTheme.Button</item>

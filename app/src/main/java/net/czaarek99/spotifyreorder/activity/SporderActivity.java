@@ -66,6 +66,13 @@ public abstract class SporderActivity extends AppCompatActivity {
         super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
     }
 
+    protected void sendBackToLoginActivity(){
+        Intent intent = new Intent(this, LogonActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        super.startActivity(intent);
+        overridePendingTransition(R.anim.leave_activity_slide_in, R.anim.leave_activity_slide_out);
+    }
+
     private void updateAdVisibility(){
         if(!getSApplication().areAdsEnabled() && activityAd != null){
             activityAd.getLayoutParams().height = 1;

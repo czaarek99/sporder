@@ -22,37 +22,30 @@ import net.czaarek99.spotifyreorder.adapter.TrackAdapter;
  */
 public class TrackDragItem extends DragItem {
 
-    private final DragListView dragList;
     private final TrackAdapter trackAdapter;
-    private int dragViewHeight = 0;
 
     public TrackDragItem(Context context, DragListView dragList) {
         super(context);
-        this.dragList = dragList;
         this.trackAdapter = (TrackAdapter) dragList.getAdapter();
     }
 
-    //TODO: Drag item for multiple tracks doesn't look too good atm
     @Override
     public void onBindDragView(View clickedView, View dragView) {
         if (trackAdapter.hasSelection()) {
-            LinearLayout multipleDragLayout = (LinearLayout) LayoutInflater.from(dragView.getContext()).inflate(R.layout.multiple_drag_item, null, false);
-            TextView trackAmount = (TextView) multipleDragLayout.findViewById(R.id.draggingTrackAmountText);
+            TextView trackAmount = (TextView)  LayoutInflater.from(dragView.getContext()).inflate(R.layout.multiple_drag_item, null, false);
             trackAmount.setText(dragView.getResources().getString(R.string.track_amount, trackAdapter.getSelectionSize()));
 
             int widthSpec = View.MeasureSpec.makeMeasureSpec(clickedView.getWidth(), View.MeasureSpec.EXACTLY);
             int heightSpec = View.MeasureSpec.makeMeasureSpec(clickedView.getHeight(), View.MeasureSpec.EXACTLY);
 
-            multipleDragLayout.measure(widthSpec, heightSpec);
-            multipleDragLayout.layout(0, 0, multipleDragLayout.getMeasuredWidth(), multipleDragLayout.getMeasuredHeight());
+            trackAmount.measure(widthSpec, heightSpec);
+            trackAmount.layout(0, 0, trackAmount.getMeasuredWidth(), trackAmount.getMeasuredHeight());
 
-            multipleDragLayout.setBackgroundColor(ContextCompat.getColor(clickedView.getContext(), R.color.translucentBlackLight));
+            trackAmount.setBackgroundColor(ContextCompat.getColor(clickedView.getContext(), R.color.translucentBlackLight));
 
-            Bitmap multipleDragLayoutBitmap = Bitmap.createBitmap(multipleDragLayout.getMeasuredWidth(), multipleDragLayout.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
+            Bitmap multipleDragLayoutBitmap = Bitmap.createBitmap(trackAmount.getMeasuredWidth(), trackAmount.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
             Canvas tracksCanvas = new Canvas(multipleDragLayoutBitmap);
-            multipleDragLayout.draw(tracksCanvas);
-
-            dragViewHeight = multipleDragLayoutBitmap.getHeight();
+            trackAmount.draw(tracksCanvas);
 
             //noinspection deprecation
             dragView.setBackgroundDrawable(new BitmapDrawable(clickedView.getResources(), multipleDragLayoutBitmap));
@@ -65,23 +58,6 @@ public class TrackDragItem extends DragItem {
 
             viewHolder.mainLayout.setBackgroundColor(ContextCompat.getColor(clickedView.getContext(), R.color.translucentBlack));
             viewHolder.checkBox.setVisibility(View.VISIBLE);
-        }
-
-    }
-
-    @Override
-    public void onMeasureDragView(View clickedView, View dragView) {
-        if(trackAdapter.hasSelection()){
-            int measuredHeight = clickedView.getMeasuredHeight();
-            int measuredWidth = clickedView.getMeasuredWidth();
-
-            dragView.setLayoutParams(new FrameLayout.LayoutParams(measuredWidth, dragViewHeight));
-            int widthSpec = View.MeasureSpec.makeMeasureSpec(measuredWidth, View.MeasureSpec.EXACTLY);
-            int heightSpec = View.MeasureSpec.makeMeasureSpec(measuredHeight, View.MeasureSpec.EXACTLY);
-            dragView.measure(widthSpec, heightSpec);
-
-        } else {
-            super.onMeasureDragView(clickedView, dragView);
         }
     }
 }

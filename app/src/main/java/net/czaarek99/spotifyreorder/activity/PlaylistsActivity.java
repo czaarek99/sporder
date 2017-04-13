@@ -1,6 +1,7 @@
 package net.czaarek99.spotifyreorder.activity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -10,6 +11,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.ads.AdView;
+import com.spotify.sdk.android.authentication.AuthenticationClient;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -62,6 +64,18 @@ public class PlaylistsActivity extends SporderActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(PlaylistsActivity.this, SettingsActivity.class);
                 startActivity(intent);
+            }
+        });
+
+        ImageView logoutImage = (ImageView) findViewById(R.id.logoutImage);
+        logoutImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SharedPreferences preferences = getSApplication().getPreferences();
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.remove(LogonActivity.AUTH_TYPE_SETTING_KEY);
+                editor.apply();
+                sendBackToLoginActivity();
             }
         });
 
