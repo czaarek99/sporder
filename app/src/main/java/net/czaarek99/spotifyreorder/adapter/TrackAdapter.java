@@ -16,6 +16,7 @@ import net.com.spotifyreorder.R;
 import net.czaarek99.spotifyreorder.activity.TracksActivity;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import kaaes.spotify.webapi.android.models.Track;
@@ -26,7 +27,6 @@ import kaaes.spotify.webapi.android.models.Track;
 
 public class TrackAdapter extends DragItemAdapter<Pair<Long, Track>, TrackAdapter.TrackViewHolder> {
 
-    private final List<Long> checkedBoxes = new ArrayList<>();
     private final TracksActivity tracksActivity;
     private boolean isDragging = false;
     private boolean canCreateSelection = false;
@@ -52,11 +52,14 @@ public class TrackAdapter extends DragItemAdapter<Pair<Long, Track>, TrackAdapte
         Pair<Long, Track> entry = mItemList.get(position);
         Track track = entry.second;
         holder.setTrack(track);
-        holder.itemView.setTag(holder);
+        //To trigger recyclerview logic in ListSwipeItem on line 87
+        holder.itemView.setTag(new Object());
+        holder.itemView.setTag(R.id.VIEW_HOLDER_ID, holder);
+        holder.itemView.setTag(R.id.PAIR_ID, entry);
 
         holder.initImage();
-        holder.initCheckbox(entry.first);
-        holder.determineVisibility(entry.first);
+        holder.initCheckbox();
+        holder.determineVisibility();
     }
 
     @Override
@@ -88,11 +91,11 @@ public class TrackAdapter extends DragItemAdapter<Pair<Long, Track>, TrackAdapte
 
     public void clearSelection(){
         tracksActivity.animateOutClearSelectionButton();
+        tracksActivity.tracksSettingsImage.setVisibility(View.INVISIBLE);
 
         hasSelection = false;
         selectionStart = -1;
         selectionEnd = -1;
-        checkedBoxes.clear();
         notifyDataSetChanged();
     }
 
@@ -105,26 +108,36 @@ public class TrackAdapter extends DragItemAdapter<Pair<Long, Track>, TrackAdapte
         notifyDataSetChanged();
     }
 
+    /*
+    If you edit this method please test that moving tracks up and down still works properly
+     */
     public void changeSelectionPosition(int fromPosition, int toPosition){
         boolean movedDown = toPosition > fromPosition;
+        int sizeOfItemsLeftToMove = getSelectionSize();
 
-        int prevPosition = toPosition - 1;
-        for (Long itemId : checkedBoxes) {
-            int position = getPositionForItemId(itemId);
-            if (movedDown) {
-                changeItemPosition(position, prevPosition);
-            } else {
-                changeItemPosition(position, prevPosition + 1);
+        if(movedDown){
+            for(int i = 0; i < sizeOfItemsLeftToMove; i++){
+                changeItemPosition(fromPosition, toPosition);
             }
+        } else {
+            for(int i = 0; i < sizeOfItemsLeftToMove; i++){
+                changeItemPosition(fromPosition, toPosition);
+                fromPosition++;
+                toPosition++;
+            }
+        }
+    }
 
-            prevPosition = getPositionForItemId(itemId);
+    public void quietPositionChange(int fromPos, int toPos){
+        if(this.mItemList != null && this.mItemList.size() > fromPos && this.mItemList.size() > toPos) {
+            Pair<Long, Track> item = this.mItemList.remove(fromPos);
+            this.mItemList.add(toPos, item);
         }
     }
 
     public class TrackViewHolder extends DragItemAdapter.ViewHolder {
         private final TextView trackInfoText;
         private final ImageView reorderImage;
-        private final ImageView settingsImage;
         private final TextView trackNameText;
 
         public final CheckBox checkBox;
@@ -137,44 +150,44 @@ public class TrackAdapter extends DragItemAdapter<Pair<Long, Track>, TrackAdapte
             checkBox = (CheckBox) itemView.findViewById(R.id.reorderCheckbox);
             reorderImage = (ImageView) itemView.findViewById(R.id.reorderImage);
             mainLayout = (RelativeLayout) itemView.findViewById(R.id.trackRelativeLayout);
-            settingsImage = (ImageView) itemView.findViewById(R.id.settingsImage);
         }
 
         private boolean isClickable(int position) {
-            return !hasSelection || (position >= selectionStart && position <= selectionEnd + 1);
+            return !hasSelection || position >= selectionStart;
         }
 
-        void determineVisibility(final long id){
+        private boolean isInSelection(int position){
+            return position >= selectionStart && position <= selectionEnd;
+        }
+
+        void determineVisibility(){
             mainLayout.setVisibility(View.VISIBLE);
 
-            if(hasSelection() && checkedBoxes.contains(id) && isDragging){
+            if(hasSelection() && isDragging && isInSelection(getAdapterPosition())){
                 mainLayout.setVisibility(View.INVISIBLE);
             }
         }
 
         void initImage() {
-            settingsImage.setVisibility(View.INVISIBLE);
+            reorderImage.setVisibility(View.INVISIBLE);
 
-            if (canCreateSelection) {
-                if (hasSelection && getAdapterPosition() != selectionStart) {
-                    reorderImage.setVisibility(View.INVISIBLE);
+            if(canCreateSelection){
+                reorderImage.setVisibility(View.VISIBLE);
 
-                    /*
-                    If the user isn't dragging the settings image should be shown on the element below
-                    If it's the last item in the list show it above instead
-                     */
-                    if(!isDragging && (selectionStart + 1 == getAdapterPosition() || (selectionStart -1 == getAdapterPosition() && selectionStart == getItemCount() - 1))){
-                        settingsImage.setVisibility(View.VISIBLE);
+                if(hasSelection()) {
+                    if(getAdapterPosition() == selectionStart){
+                        reorderImage.setVisibility(View.VISIBLE);
+                    } else {
+                        reorderImage.setVisibility(View.INVISIBLE);
                     }
+
                 } else {
                     reorderImage.setVisibility(View.VISIBLE);
                 }
-            } else {
-                reorderImage.setVisibility(View.INVISIBLE);
             }
         }
 
-        void initCheckbox(final long id) {
+        void initCheckbox() {
             if (canCreateSelection) {
                 final boolean isClickable = isClickable(getAdapterPosition());
 
@@ -185,64 +198,51 @@ public class TrackAdapter extends DragItemAdapter<Pair<Long, Track>, TrackAdapte
                         checkBox.setVisibility(View.VISIBLE);
                     } else {
                         checkBox.setVisibility(View.INVISIBLE);
-                        checkedBoxes.remove(id);
                     }
                 }
 
-                if (checkedBoxes.contains(id)) {
+                final int position = getAdapterPosition();
+                if (isInSelection(position)) {
                     checkBox.setChecked(true);
                 } else {
                     checkBox.setChecked(false);
                 }
 
-                final int position = getAdapterPosition();
                 checkBox.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        boolean isInSelection = isInSelection(position);
                         if (isClickable) {
 
-                            if (checkedBoxes.contains(id)) {
-                                checkedBoxes.remove(id);
-                                checkBox.setChecked(false);
-
+                            if (isInSelection) {
                                 if (hasSelection) {
                                     if (position == selectionStart) {
                                        clearSelection();
                                     } else {
-                                        int prevSelectionEnd = selectionEnd;
                                         selectionEnd = position - 1;
-                                        for(int position2 = selectionStart; position2 <= prevSelectionEnd + 1; position2++){
-                                            notifyItemChanged(position2);
-                                        }
+                                        notifyDataSetChanged();
                                     }
                                 }
                             } else {
                                 if (hasSelection) {
                                     selectionEnd = position;
-                                    notifyItemChanged(position + 1);
-                                    notifyItemChanged(position);
+                                    notifyDataSetChanged();
                                 } else {
-                                    tracksActivity.animateInClearSelectionButton();
                                     hasSelection = true;
                                     selectionStart = position;
                                     selectionEnd = position;
+
                                     notifyDataSetChanged();
+                                    tracksActivity.animateInClearSelectionButton();
+                                    tracksActivity.tracksSettingsImage.setVisibility(View.VISIBLE);
                                 }
 
-                                checkedBoxes.add(id);
-                                checkBox.setChecked(true);
                             }
 
                         }
                     }
                 });
 
-                settingsImage.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        tracksActivity.animateInSelectionOptions();
-                    }
-                });
             } else {
                 checkBox.setVisibility(View.INVISIBLE);
             }

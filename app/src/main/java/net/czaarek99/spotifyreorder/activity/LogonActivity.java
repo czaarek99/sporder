@@ -33,9 +33,10 @@ import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 //TODO: Make this screen look better
 public class LogonActivity extends SporderActivity {
 
-    private static final String CLIENT_ID = "ec7df65dbcf5446eb32cd5d10d5e7be3";
+    private static final String CLIENT_ID = "8a6d955cb8ae4c56b9c00a0bd92c6397";
     private static final int SPOTIFY_AUTH_REQUEST_CODE = 1000;
     public static final String AUTH_TYPE_SETTING_KEY = "auth_type";
+    public static final Uri SPOTIFY_ACCOUNTS_URL = Uri.parse("https://accounts.spotify.com");
 
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     private final AtomicBoolean runSessionChecks = new AtomicBoolean(false);
@@ -117,8 +118,11 @@ public class LogonActivity extends SporderActivity {
 
         Uri uri = intent.getData();
         if(uri != null){
-            AuthenticationResponse response = AuthenticationResponse.fromUri(uri);
-            handleResponse(response, SpotifyAuthType.WEBVIEW);
+            String stringUri = uri.toString();
+            if(stringUri.contains("login")){
+                AuthenticationResponse response = AuthenticationResponse.fromUri(uri);
+                handleResponse(response, SpotifyAuthType.WEBVIEW);
+            }
         }
     }
 
@@ -141,7 +145,7 @@ public class LogonActivity extends SporderActivity {
 
     private void loginToSpotify(SpotifyAuthType authType, boolean showDialog){
         AuthenticationRequest.Builder builder =
-                new AuthenticationRequest.Builder(CLIENT_ID, AuthenticationResponse.Type.TOKEN, "reorder://callback")
+                new AuthenticationRequest.Builder(CLIENT_ID, AuthenticationResponse.Type.TOKEN, "plestle://login")
                 .setScopes(new String[]{
                         "playlist-read-private",
                         "playlist-read-collaborative",
@@ -176,7 +180,7 @@ public class LogonActivity extends SporderActivity {
         });
     }
 
-    private enum SpotifyAuthType {
+    public enum SpotifyAuthType {
         WEBVIEW, APP
     }
 }

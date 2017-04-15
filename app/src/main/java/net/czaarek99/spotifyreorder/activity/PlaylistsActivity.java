@@ -5,13 +5,12 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SimpleItemAnimator;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.ads.AdView;
-import com.spotify.sdk.android.authentication.AuthenticationClient;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,6 +36,8 @@ import retrofit.client.Response;
 
 public class PlaylistsActivity extends SporderActivity {
 
+    private static final int SETTINGS_UPDATE_REQUEST_CODE = 500;
+
     private final PlaylistAdapter playlistAdapter = new PlaylistAdapter(this, new ArrayList<PlaylistSimple>());
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
@@ -49,11 +50,15 @@ public class PlaylistsActivity extends SporderActivity {
         playlistsAd.loadAd(Util.constructSafeAdRequest());
         setActivityAd(playlistsAd);
 
+        playlistAdapter.setSortMethod(getSApplication().getPreferences().getString(
+                SettingsActivity.SORT_METHOD_ID, getResources().getString(R.string.spotify_sort)));
+
         final RecyclerView playlistList = (RecyclerView) findViewById(R.id.playlistList);
         playlistList.setAdapter(playlistAdapter);
         playlistList.setLayoutManager(new LinearLayoutManager(this));
         playlistList.setHasFixedSize(true);
         playlistList.setNestedScrollingEnabled(false);
+        playlistList.setItemAnimator(null);
 
         TextView playlistsTitleText = (TextView) findViewById(R.id.playlistsTitleText);
         playlistsTitleText.setText(R.string.playlists);
@@ -63,7 +68,7 @@ public class PlaylistsActivity extends SporderActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(PlaylistsActivity.this, SettingsActivity.class);
-                startActivity(intent);
+                startActivityForResult(intent, SETTINGS_UPDATE_REQUEST_CODE);
             }
         });
 
@@ -73,9 +78,19 @@ public class PlaylistsActivity extends SporderActivity {
             public void onClick(View v) {
                 SharedPreferences preferences = getSApplication().getPreferences();
                 SharedPreferences.Editor editor = preferences.edit();
+
+                String authType = preferences.getString(LogonActivity.AUTH_TYPE_SETTING_KEY, null);
+                LogonActivity.SpotifyAuthType type = Enum.valueOf(LogonActivity.SpotifyAuthType.class, authType);
+
                 editor.remove(LogonActivity.AUTH_TYPE_SETTING_KEY);
                 editor.apply();
+
                 sendBackToLoginActivity();
+
+                if(type == LogonActivity.SpotifyAuthType.WEBVIEW){
+                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, LogonActivity.SPOTIFY_ACCOUNTS_URL);
+                    startActivity(browserIntent);
+                }
             }
         });
 
@@ -111,13 +126,24 @@ public class PlaylistsActivity extends SporderActivity {
                 playlistAdapter.setItemList(playlists);
             }
         });
+
     }
 
     @Override
     protected void onStop() {
         scheduler.shutdown();
-        playlistAdapter.killImageThreads();
         super.onStop();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if(requestCode == SETTINGS_UPDATE_REQUEST_CODE && resultCode == RESULT_OK){
+            Bundle extras = data.getExtras();
+            String sortMethod = extras.getString(SettingsActivity.SORT_METHOD_ID);
+            playlistAdapter.setSortMethod(sortMethod);
+        }
     }
 
     private void fetchPlaylists(final PlaylistFetchCallback finishCallback, final PlaylistFetchCallback updateCallback) {
@@ -159,26 +185,24 @@ public class PlaylistsActivity extends SporderActivity {
                     }
                 };
 
-                for (int i = 0; i < neededRequests; i++) {
-                    callbackGroup.addCallback(new SpotifyCallback<Pager<PlaylistSimple>>() {
-                        @Override
-                        public void success(Pager<PlaylistSimple> playlistSimplePager, Response response) {
-                            //Web API only allows editing of playlists that the user owns so we remove ones that they can't
-                            for (PlaylistSimple playlist : playlistSimplePager.items) {
-                                if (playlist.owner.id.equals(userId)) {
-                                    playlists.add(playlist);
-                                }
+                callbackGroup.addMultipleCallbacks(neededRequests, new SpotifyCallback<Pager<PlaylistSimple>>() {
+                    @Override
+                    public void success(Pager<PlaylistSimple> playlistSimplePager, Response response) {
+                        //Web API only allows editing of playlists that the user owns so we remove ones that they can't
+                        for (PlaylistSimple playlist : playlistSimplePager.items) {
+                            if (playlist.owner.id.equals(userId)) {
+                                playlists.add(playlist);
                             }
-
-                            updateCallback.onSuccess(playlists);
                         }
 
-                        @Override
-                        public void failure(SpotifyError spotifyError) {
-                            updateCallback.onFailure();
-                        }
-                    });
-                }
+                        updateCallback.onSuccess(playlists);
+                    }
+
+                    @Override
+                    public void failure(SpotifyError spotifyError) {
+                        updateCallback.onFailure();
+                    }
+                });
 
                 callbackGroup.executeCallbacks();
             }

@@ -1,10 +1,6 @@
 package net.czaarek99.spotifyreorder.adapter;
 
-import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.support.v4.util.Pair;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,17 +15,11 @@ import net.com.spotifyreorder.R;
 import net.czaarek99.spotifyreorder.activity.PlaylistsActivity;
 import net.czaarek99.spotifyreorder.activity.TracksActivity;
 
-import java.io.InputStream;
-import java.net.URL;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
-import kaaes.spotify.webapi.android.models.Image;
 import kaaes.spotify.webapi.android.models.PlaylistSimple;
 
 /**
@@ -38,9 +28,10 @@ import kaaes.spotify.webapi.android.models.PlaylistSimple;
 
 public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.ViewHolder> {
 
-    private final AtomicBoolean runImageThreads = new AtomicBoolean(true);
+    private final List<PlaylistSimple> cachedSpotifyOrder = new ArrayList<>();
     private final PlaylistsActivity activity;
     private List<PlaylistSimple> itemList;
+    private String sortMode;
 
     public PlaylistAdapter(final PlaylistsActivity activity, List<PlaylistSimple> list) {
         setHasStableIds(true);
@@ -66,18 +57,54 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.ViewHo
         return itemList.size();
     }
 
-    public void setItemList(List<PlaylistSimple> itemList){
-        this.itemList = itemList;
-        notifyDataSetChanged();
-    }
-
     @Override
     public long getItemId(int position) {
         return itemList.get(position).id.hashCode();
     }
 
-    public void killImageThreads(){
-        runImageThreads.set(false);
+    public void setItemList(List<PlaylistSimple> itemList){
+        cachedSpotifyOrder.clear();
+        cachedSpotifyOrder.addAll(itemList);
+
+        this.itemList = itemList;
+        sort();
+        notifyDataSetChanged();
+    }
+
+    public void setSortMethod(String sortMode){
+        this.sortMode = sortMode;
+        sort();
+        notifyDataSetChanged();
+    }
+
+    private void sort(){
+        if(itemList.size() > 0){
+            if(sortMode.equals(getString(R.string.alphabetically))){
+                Collections.sort(itemList, new Comparator<PlaylistSimple>() {
+                    @Override
+                    public int compare(PlaylistSimple o1, PlaylistSimple o2) {
+                        return o1.name.compareTo(o2.name);
+                    }
+                });
+            } else if(sortMode.equals(getString(R.string.most_tracks))){
+                Collections.sort(itemList, new Comparator<PlaylistSimple>() {
+                    @Override
+                    public int compare(PlaylistSimple o1, PlaylistSimple o2) {
+                        Integer trackAmount1 = o1.tracks.total;
+                        Integer trackAmount2 = o2.tracks.total;
+                        return -trackAmount1.compareTo(trackAmount2);
+                    }
+                });
+            } else if(sortMode.equals(getString(R.string.spotify_sort))){
+                if(!itemList.equals(cachedSpotifyOrder)){
+                    this.itemList = cachedSpotifyOrder;
+                }
+            }
+        }
+    }
+
+    private String getString(int resId){
+        return activity.getResources().getString(resId);
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {

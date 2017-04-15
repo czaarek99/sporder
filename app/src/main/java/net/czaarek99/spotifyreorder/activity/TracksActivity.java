@@ -10,11 +10,11 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.ads.AdView;
 import com.woxthebox.draglistview.DragListView;
@@ -34,6 +34,7 @@ import net.com.spotifyreorder.R;
 import net.czaarek99.spotifyreorder.adapter.TrackAdapter;
 import net.czaarek99.spotifyreorder.item.TrackDragItem;
 import net.czaarek99.spotifyreorder.util.CallbackGroup;
+import net.czaarek99.spotifyreorder.util.NormanDialog;
 import net.czaarek99.spotifyreorder.util.ProgressBarAnimation;
 import net.czaarek99.spotifyreorder.util.Util;
 
@@ -52,6 +53,7 @@ import retrofit.client.Response;
 import xyz.danoz.recyclerviewfastscroller.vertical.VerticalRecyclerViewFastScroller;
 
 //TODO: Auto refresh algorithm
+//TODO: Better animations for multiple items change
 public class TracksActivity extends SporderActivity {
 
     private final Queue<CallbackGroup<SnapshotId>> modificationCalls = new ConcurrentLinkedQueue<>();
@@ -66,9 +68,10 @@ public class TracksActivity extends SporderActivity {
     private View selectionOptionsDismissView;
     private FloatingActionButton clearSelectionButton;
     private String playlistId;
-    private String playlistName;
     private String currentUserId;
     private int trackAmount;
+
+    public ImageView tracksSettingsImage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,6 +91,14 @@ public class TracksActivity extends SporderActivity {
         selectionOptionsMainLayout = (RelativeLayout) findViewById(R.id.selectionOptionsMainLayout);
         selectionOptionsDismissView = findViewById(R.id.selectionOptionsDismissView);
         clearSelectionButton = (FloatingActionButton) findViewById(R.id.clearSelectionButton);
+        tracksSettingsImage = (ImageView) findViewById(R.id.tracksSettingsImage);
+
+        tracksSettingsImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                animateInSelectionOptions();
+            }
+        });
 
         clearSelectionButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -124,7 +135,7 @@ public class TracksActivity extends SporderActivity {
         sendToBottomText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                int bottomPosition = trackListAdapter.getItemCount();
+                int bottomPosition = trackListAdapter.getItemCount() - 1;
                 int fromPosition = trackListAdapter.getSelectionStart();
 
                 if(bottomPosition != fromPosition){
@@ -151,8 +162,13 @@ public class TracksActivity extends SporderActivity {
         deleteTracksText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                dispatchDelete(trackListAdapter.getSelectionStart(), trackListAdapter.getSelectionEnd());
-                trackListAdapter.clearSelection();
+                if(trackListAdapter.getSelectionSize() > 100){
+                    new NormanDialog(TracksActivity.this, R.string.too_many_delete_error, R.string.Ok, null).show();
+                } else {
+                    dispatchDelete(trackListAdapter.getSelectionStart(), trackListAdapter.getSelectionEnd());
+                    trackListAdapter.clearSelection();
+                }
+
                 animateOutSelectionOptions();
             }
         });
@@ -164,7 +180,7 @@ public class TracksActivity extends SporderActivity {
             }
         });
 
-        DragListView trackList = (DragListView) findViewById(R.id.trackList);
+        final DragListView trackList = (DragListView) findViewById(R.id.trackList);
         trackList.setAdapter(trackListAdapter, false);
         trackList.setLayoutManager(new LinearLayoutManager(this));
         trackList.setCanDragHorizontally(false);
@@ -197,6 +213,17 @@ public class TracksActivity extends SporderActivity {
             @Override
             public void onItemDragEnded(int fromPosition, int toPosition) {
                 if(fromPosition != toPosition){
+                    if(trackListAdapter.hasSelection()){
+                        /*
+                        * When a user finishes a drag the DragListView will automatically move
+                        * the currently dragged DragItem to the correct position
+                        * This is problematic with a selection because you now have an
+                        * item that is out of sync. We solve this by undoing what
+                        * the DragListView does
+                        * */
+                        trackListAdapter.quietPositionChange(toPosition, fromPosition);
+                    }
+
                     dispatchReorder(fromPosition, toPosition);
                 }
 
@@ -219,9 +246,8 @@ public class TracksActivity extends SporderActivity {
             @Override
             public void onItemSwipeEnded(ListSwipeItem item, ListSwipeItem.SwipeDirection swipedDirection) {
                 if(swipedDirection == ListSwipeItem.SwipeDirection.LEFT){
-                    Pair<Long, Track> adapterItem = (Pair<Long, Track>) item.getTag();
+                    Pair<Long, Track> adapterItem = (Pair<Long, Track>) item.getTag(R.id.PAIR_ID);
                     int position = trackListAdapter.getPositionForItem(adapterItem);
-
                     dispatchDelete(position, position);
                 }
             }
@@ -272,6 +298,14 @@ public class TracksActivity extends SporderActivity {
             }
         }).start();
 
+
+        if(getSApplication().hasUserRemovedAds()){
+            RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) trackList.getLayoutParams();
+            params.addRule(RelativeLayout.ABOVE, 0);
+            params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+            trackList.setLayoutParams(params);
+        }
+
         VerticalRecyclerViewFastScroller fastScroller = (VerticalRecyclerViewFastScroller) findViewById(R.id.tracksFastScroller);
         fastScroller.setRecyclerView(trackList.getRecyclerView());
         fastScroller.setTimeout(2000);
@@ -281,7 +315,7 @@ public class TracksActivity extends SporderActivity {
 
         Bundle extras = getIntent().getExtras();
         playlistId = extras.getString("playlistId");
-        playlistName = extras.getString("playlistName");
+        String playlistName = extras.getString("playlistName");
 
         spotify.getPlaylist(currentUserId, playlistId, new Callback<Playlist>() {
             @Override
@@ -350,19 +384,17 @@ public class TracksActivity extends SporderActivity {
         boolean movedDown = toPosition > fromPosition;
         final Map<String, Object> options = new HashMap<>();
 
-        //TODO: Understand why this works lol
-        if(trackListAdapter.hasSelection() && trackListAdapter.getSelectionSize() > 1){
-            options.put("insert_before", toPosition);
-        } else {
-            options.put("insert_before", movedDown ? toPosition + 1 : toPosition);
+        options.put("range_start", fromPosition);
+        options.put("insert_before", toPosition);
+        options.put("range_length", 1);
+
+        if(movedDown){
+            options.put("insert_before", toPosition + 1);
         }
 
-        if(trackListAdapter.hasSelection()) {
-            trackListAdapter.changeSelectionPosition(fromPosition, toPosition);
-            options.put("range_start", trackListAdapter.getSelectionStart());
+        if(trackListAdapter.hasSelection()){
             options.put("range_length", trackListAdapter.getSelectionSize());
-        } else {
-            options.put("range_start", fromPosition);
+            trackListAdapter.changeSelectionPosition(fromPosition, toPosition);
         }
 
         CallbackGroup<SnapshotId> callbackGroup = new CallbackGroup<SnapshotId>() {
@@ -424,7 +456,7 @@ public class TracksActivity extends SporderActivity {
         callbackGroup.addCallback(new SpotifyCallback<SnapshotId>() {
             @Override
             public void failure(SpotifyError spotifyError) {
-                Toast.makeText(TracksActivity.this, spotifyError.getMessage(), Toast.LENGTH_LONG).show();
+                //Toast.makeText(TracksActivity.this, spotifyError.getMessage(), Toast.LENGTH_LONG).show();
             }
 
             @Override

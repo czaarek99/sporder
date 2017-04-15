@@ -50,7 +50,7 @@ public class TrackDragItem extends DragItem {
             //noinspection deprecation
             dragView.setBackgroundDrawable(new BitmapDrawable(clickedView.getResources(), multipleDragLayoutBitmap));
         } else {
-            TrackAdapter.TrackViewHolder viewHolder = (TrackAdapter.TrackViewHolder) clickedView.getTag();
+            TrackAdapter.TrackViewHolder viewHolder = (TrackAdapter.TrackViewHolder) clickedView.getTag(R.id.VIEW_HOLDER_ID);
             viewHolder.checkBox.setVisibility(View.INVISIBLE);
             viewHolder.mainLayout.setBackgroundColor(ContextCompat.getColor(clickedView.getContext(), R.color.translucentBlackLight));
 

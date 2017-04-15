@@ -20,7 +20,7 @@
             android:layout_weight="1"
             android:background="@drawable/background_press_green"
             android:gravity="center"
-            android:text="Spotify Login"
+            android:text="@string/spotify_login"
             android:textAppearance="@android:style/TextAppearance.Large" />
 
         <TextView
@@ -30,7 +30,7 @@
             android:layout_weight="1"
             android:background="@drawable/background_press_black"
             android:gravity="center"
-            android:text="Manual Login"
+            android:text="@string/manual_login"
             android:textAppearance="@android:style/TextAppearance.Large" />
     </LinearLayout>
 

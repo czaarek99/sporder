@@ -13,6 +13,8 @@ import android.os.RemoteException;
 import com.android.vending.billing.IInAppBillingService;
 import com.google.android.gms.ads.MobileAds;
 
+import net.czaarek99.spotifyreorder.activity.SettingsActivity;
+
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -31,7 +33,7 @@ public class SporderApplication extends Application {
 
     private final AtomicReference<IInAppBillingService> billingService = new AtomicReference<>();
     private final SpotifyApi spotifyApi = new SpotifyApi();
-    private boolean ads = true;
+    private boolean areAdsRemoved = true;
     private UserPrivate spotifyUser;
     private SharedPreferences preferences;
 
@@ -59,15 +61,15 @@ public class SporderApplication extends Application {
         return spotifyApi.getService();
     }
 
-    public boolean areAdsEnabled(){
-        return ads;
+    public boolean hasUserRemovedAds(){
+        return areAdsRemoved;
     }
 
     public void disableAds(){
-        ads = false;
+        areAdsRemoved = true;
 
         SharedPreferences.Editor editor = preferences.edit();
-        editor.putBoolean("ads", false);
+        editor.putBoolean(SettingsActivity.ADS_REMOVED_ID, true);
         editor.apply();
     }
 
@@ -87,7 +89,7 @@ public class SporderApplication extends Application {
         MobileAds.initialize(getApplicationContext(), appId);
 
         preferences = getSharedPreferences(PREFERENCES_NAME, 0);
-        ads = preferences.getBoolean("ads", true);
+        areAdsRemoved = preferences.getBoolean(SettingsActivity.ADS_REMOVED_ID, false);
 
         ServiceConnection mServiceConn = new ServiceConnection() {
             @Override
@@ -110,7 +112,7 @@ public class SporderApplication extends Application {
                             disableAds();
                         } else {
                             SharedPreferences.Editor editor = preferences.edit();
-                            editor.putBoolean("ads", true);
+                            editor.putBoolean(SettingsActivity.ADS_REMOVED_ID, false);
                             editor.apply();
                         }
                     }

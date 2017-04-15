@@ -80,7 +80,12 @@ public abstract class CallbackGroup<T> {
         } else {
             throw new RuntimeException("CallbackGroup is already in progress!");
         }
+    }
 
+    public void addMultipleCallbacks(int amount, final Callback<T> callback){
+        for(int i = 0; i < amount; i++){
+            addCallback(callback);
+        }
     }
 
     public int getRetries() {
