@@ -1,6 +1,5 @@
 <resources>
-    <string name="app_name">Plestle</string>
-    <string name="log_in">Log in</string>
+    <string name="app_name" translatable="false">Plestle</string>
     <string name="log_out">Log out</string>
     <string name="track_amount">%1$d Tracks</string>
     <string name="playlists">Playlists</string>
@@ -10,25 +9,21 @@
     <string name="send_to_bottom">Send to bottom</string>
     <string name="send_to_top">Send to top</string>
     <string name="delete_tracks">Delete tracks</string>
-    <string name="delete_track">Delete Track</string>
+    <string name="delete_track">Delete track</string>
     <string name="can_only_edit_own_playlists">Only playlists that you own are displayed. Editing collaborative playlists owned by other users is currently unsupported.</string>
     <string name="reorder_image_description">Change playlist order</string>
     <string name="selection_settings_image_description">Selection options</string>
-    <string name="error">Error</string>
+    <string name="error" translatable="false">Error</string>
     <string name="spotify_login">Spotify Login</string>
     <string name="manual_login">Manual Login</string>
-    <string name="Ok">OK</string>
-
-    <!-- Ads -->
-    <string name="playlists_ad_id">ca-app-pub-7701342036796677/1382826148</string>
-    <string name="tracks_ad_id">ca-app-pub-7701342036796677/4805467341</string>
+    <string name="Ok" translatable="false">OK</string>
+    <string name="running_version">Running version %1$s</string>
 
     <!-- Error messages -->
     <string name="fetch_playlists_error">
         Norman couldn\'t find your playlists. He recommends trying to log in again.
     </string>
-    <string name="fetch_tracks_error">
-        Meow. Seems like norman lost the tracks for this song. So here is a joke instead:
+    <string name="fetch_tracks_error">Meow. Seems like norman lost the tracks for this song. So here is a joke instead:
         \nQ: Do you want to hear a bad cat joke?
         \nA: Just kitten.
     </string>
@@ -60,11 +55,21 @@
     <string name="remove_ads_info">Permanently remove all ads for a small payment.</string>
     <string name="ads_removed">Ads have been removed.</string>
     <string name="playlist_sorting">Playlist Sorting</string>
-    <string name="playlist_sorting_info">Decide what to sort the playlist list by:</string>
-    <string name="alphabetically">Alphabetically</string>
+    <string name="playlist_sorting_info">Sort the playlist list by:</string>
+    <string name="alphabetically">Alphabetical</string>
     <string name="most_tracks">Most Tracks</string>
     <string name="spotify_sort">Spotify default</string>
+    <string name="hide_empty_playlists">Hide empty playlists</string>
+    <string name="hide_empty_playlists_info">Hide playlists that don\'t contain at least one track in them.</string>
 
+    <!-- Ads -->
+    <string name="playlists_ad_id" translatable="false">ca-app-pub-7701342036796677/1382826148</string>
+    <string name="tracks_ad_id" translatable="false">ca-app-pub-7701342036796677/4805467341</string>
+    <string name="settings_ad_id" translatable="false"> ca-app-pub-7701342036796677/8351239344</string>
+
+    <!-- IDs -->
     <item type="id" name="VIEW_HOLDER_ID" />
     <item type="id" name="PAIR_ID" />
+    <string name="leave_rating">Leave a rating</string>
+    <string name="leave_rating_info">Enjoying the app? It helps tremendously if you leave us a rating!</string>
 </resources>

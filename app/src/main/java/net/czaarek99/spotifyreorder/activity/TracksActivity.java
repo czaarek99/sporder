@@ -104,8 +104,15 @@ public class TracksActivity extends SporderActivity {
             @Override
             public void onClick(View v) {
                 trackListAdapter.clearSelection();
+                animateOutClearSelectionButton();
             }
         });
+
+        if(getSApplication().hasUserRemovedAds()){
+            RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) clearSelectionButton.getLayoutParams();
+            params.bottomMargin = (int) (25 * getResources().getDisplayMetrics().density);
+            clearSelectionButton.setLayoutParams(params);
+        }
 
         AdView tracksAdView = (AdView) findViewById(R.id.tracksAd);
         tracksAdView.loadAd(Util.constructSafeAdRequest());
@@ -202,7 +209,12 @@ public class TracksActivity extends SporderActivity {
         trackList.setDragListListener(new DragListView.DragListListener() {
             @Override
             public void onItemDragStarted(int position) {
-                trackListAdapter.onDragStart();
+                trackListAdapter.setDragging(true);
+                trackListAdapter.notifyDataSetChanged();
+
+                if(trackListAdapter.hasSelection()){
+                    animateOutClearSelectionButton();
+                }
             }
 
             @Override
@@ -227,7 +239,8 @@ public class TracksActivity extends SporderActivity {
                     dispatchReorder(fromPosition, toPosition);
                 }
 
-                trackListAdapter.onDragFinish();
+                trackListAdapter.setDragging(false);
+                trackListAdapter.clearSelection();
             }
         });
 
@@ -357,6 +370,8 @@ public class TracksActivity extends SporderActivity {
         Animation fromBottom = AnimationUtils.loadAnimation(this, R.anim.slide_in_bottom);
         selectionOptionsMainLayout.startAnimation(fromBottom);
         selectionOptionsMainLayout.setVisibility(View.VISIBLE);
+
+        animateOutClearSelectionButton();
     }
 
     private void animateOutSelectionOptions(){
@@ -365,6 +380,10 @@ public class TracksActivity extends SporderActivity {
         Animation slideOutBottom = AnimationUtils.loadAnimation(this, R.anim.slide_out_bottom);
         selectionOptionsMainLayout.startAnimation(slideOutBottom);
         selectionOptionsMainLayout.setVisibility(View.GONE);
+
+        if(trackListAdapter.hasSelection()){
+            animateInClearSelectionButton();
+        }
     }
 
     public void animateInClearSelectionButton(){

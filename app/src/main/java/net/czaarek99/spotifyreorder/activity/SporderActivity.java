@@ -73,7 +73,6 @@ public abstract class SporderActivity extends AppCompatActivity {
         overridePendingTransition(R.anim.leave_activity_slide_in, R.anim.leave_activity_slide_out);
     }
 
-    //TODO: App has to be restarted for this to take effect, fix?
     private void updateAdVisibility(){
         if(getSApplication().hasUserRemovedAds() && activityAd != null){
             activityAd.setVisibility(View.GONE);
@@ -83,7 +82,6 @@ public abstract class SporderActivity extends AppCompatActivity {
     protected void setActivityAd(AdView ad){
         activityAd = ad;
         updateAdVisibility();
-
     }
 
     public SporderApplication getSApplication(){

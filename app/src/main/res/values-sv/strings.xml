@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ads_removed">Reklamen har blivit borttagen.</string>
+    <string name="alphabetically">Alfabetiskt</string>
+    <string name="auth_token_error">Norman är ledsen men din session har gått ut. Du måste logga in igen.</string>
+    <string name="billing_failed_error">Norman kunde inte ansluta till google play. Försök igen senare.</string>
+    <string name="can_only_edit_own_playlists">Bara spellistor som du äger visas. Det är just nu inte möjligt att redigera gemensamma spellistor som ägs av någon annan.</string>
+    <string name="delete_track">Radera låt</string>
+    <string name="delete_tracks">Radera låtar</string>
+    <string name="fetch_playlist_info_error">Det ser ut som att norman har ätit upp viktig informatin. Försök igen.</string>
+    <string name="fetch_playlists_error">Norman kunde inte hitta dina spellistor. Han rekommenderar att logga in igen.</string>
+    <string name="fetch_tracks_error">Meow. Norman tappade bort låtarna till den här spellistan. Försök igen.</string>
+    <string name="fetch_user_data_error">Om du inte talar om ditt namn för Norman kommer han inte att leka! Försök att logga in igen.</string>
+    <string name="hide_empty_playlists">Dölj tomma spellistor</string>
+    <string name="hide_empty_playlists_info">Dölj spellistor som inte innehållar åtminstone en låt</string>
+    <string name="loading_playlist">Laddar spellistans låtar…</string>
+    <string name="log_out">Logga ut</string>
+    <string name="log_in_error">Norman blev inte insläppt på Spotify. Försök att logga in igen.</string>
+    <string name="manual_login">Manuell Inloggning</string>
+    <string name="modify_playlist_error">Norman tappade bort dina förändringar när han var på väg till Spotify. Han är ledsen men är också ganska säker att du kan försöka igen.</string>
+    <string name="most_tracks">Flest Låtar</string>
+    <string name="playlist_sorting">Sortering av Spellistor</string>
+    <string name="playlist_sorting_info">Sortera spellistorna med tanke på:</string>
+    <string name="playlists">Spellistor</string>
+    <string name="remove_ads">Ta bort reklam</string>
+    <string name="remove_ads_info">Ta bort reklamen för en liten betalning.</string>
+    <string name="remove_selection">Ta bort markering</string>
+    <string name="reorder_image_description">Ändra spellistans ordning</string>
+    <string name="selection_settings_image_description">Inställningar för markering</string>
+    <string name="send_to_bottom">Flytta till botten</string>
+    <string name="send_to_top">Flytta till toppen</string>
+    <string name="settings">Inställningar</string>
+    <string name="spotify_login">Spotify Inloggning</string>
+    <string name="spotify_sort">Spotify Sortering</string>
+    <string name="too_many_delete_error">Norma när ledsen men du kan bara ta bort upp till 100 låtar samtidigt.</string>
+    <string name="track_amount">%1$d Låtar</string>
+    <string name="leave_rating">Betygsätt appen</string>
+    <string name="leave_rating_info">Gillar du appen? Det hjälper oss oerhört mycket om du betygsätter den!</string>
+    <string name="running_version">Kör version %1$s</string>
+</resources>

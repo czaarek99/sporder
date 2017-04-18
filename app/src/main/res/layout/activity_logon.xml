@@ -8,10 +8,27 @@
 
     <LinearLayout
         android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/loginButtonLayout"
+        android:layout_alignParentTop="true"
+        android:orientation="vertical"
+        android:gravity="center">
+
+        <ImageView
+            android:id="@+id/stripesImage"
+            android:layout_width="320dp"
+            android:layout_height="320dp"
+            android:rotation="48"
+            app:srcCompat="@drawable/stripes" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@id/loginButtonLayout"
+        android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_alignParentBottom="true"
-        android:orientation="horizontal"
-        >
+        android:orientation="horizontal">
 
         <TextView
             android:id="@+id/spotifyLoginText"
@@ -28,10 +45,13 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="@drawable/background_press_black"
+            android:textColor="@color/glueGreen"
+            android:background="@drawable/background_press_white"
             android:gravity="center"
             android:text="@string/manual_login"
             android:textAppearance="@android:style/TextAppearance.Large" />
     </LinearLayout>
+
+
 
 </RelativeLayout>

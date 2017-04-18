@@ -5,7 +5,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.SimpleItemAnimator;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -50,8 +49,12 @@ public class PlaylistsActivity extends SporderActivity {
         playlistsAd.loadAd(Util.constructSafeAdRequest());
         setActivityAd(playlistsAd);
 
-        playlistAdapter.setSortMethod(getSApplication().getPreferences().getString(
+        SharedPreferences preferences = getSApplication().getPreferences();
+
+        playlistAdapter.setSortMethod(preferences.getString(
                 SettingsActivity.SORT_METHOD_ID, getResources().getString(R.string.spotify_sort)));
+        playlistAdapter.setHideEmptyPlaylists(preferences.getBoolean(
+                SettingsActivity.HIDE_EMPTY_PLAYLISTS_ID, false));
 
         final RecyclerView playlistList = (RecyclerView) findViewById(R.id.playlistList);
         playlistList.setAdapter(playlistAdapter);
@@ -143,6 +146,9 @@ public class PlaylistsActivity extends SporderActivity {
             Bundle extras = data.getExtras();
             String sortMethod = extras.getString(SettingsActivity.SORT_METHOD_ID);
             playlistAdapter.setSortMethod(sortMethod);
+            Boolean hideEmpty = extras.getBoolean(SettingsActivity.HIDE_EMPTY_PLAYLISTS_ID);
+            playlistAdapter.setHideEmptyPlaylists(hideEmpty);
+            playlistAdapter.updateList();
         }
     }
 

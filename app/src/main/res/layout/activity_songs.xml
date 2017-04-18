@@ -68,6 +68,7 @@
             android:indeterminate="false"
             android:max="100"
             android:progress="0" />
+
     </LinearLayout>
 
 
@@ -85,13 +86,26 @@
     </com.woxthebox.draglistview.DragListView>
 
 
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/clearSelectionButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginBottom="75dp"
+        android:layout_marginEnd="25dp"
+        android:layout_marginRight="25dp"
+        android:clickable="true"
+        android:visibility="gone"
+        ads:fabSize="mini"
+        ads:srcCompat="@drawable/close" />
+
     <com.google.android.gms.ads.AdView
         android:id="@id/tracksAd"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_alignParentBottom="true"
-        android:background="#00000000"
-        android:visibility="visible"
         ads:adSize="BANNER"
         ads:adUnitId="@string/tracks_ad_id" />
 
@@ -111,22 +125,6 @@
         recyclerviewfastscroller:rfs_handleBackground="@drawable/green_scrollbar"
         recyclerviewfastscroller:rfs_handleWidth="9dp"
         />
-
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/clearSelectionButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_marginBottom="75dp"
-        android:layout_marginEnd="35dp"
-        android:layout_marginRight="35dp"
-        android:clickable="true"
-        android:visibility="gone"
-        ads:fabSize="mini"
-        ads:srcCompat="@drawable/close"
-        recyclerviewfastscroller:elevation="0dp" />
 
     <RelativeLayout
         android:id="@+id/selectionOptionsMainLayout"
@@ -177,8 +175,6 @@
         </ScrollView>
 
     </RelativeLayout>
-
-
 
 </RelativeLayout>
 

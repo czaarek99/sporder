@@ -1,12 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/settingsActivityContainer"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:ads="http://schemas.android.com/apk/res-auto">
 
-    <include
-        android:id="@+id/settingsTitle"
-        layout="@layout/title_textview"
+    <LinearLayout
+        android:id="@+id/settingsContainer"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="5dp"
+        android:layout_marginStart="5dp"
+        android:layout_marginRight="5dp"
+        android:layout_marginEnd="5dp"
+        android:layout_above="@+id/settingsAd"
+        >
+
+        <include
+            android:id="@+id/settingsTitle"
+            layout="@layout/title_textview"
+            />
+
+        <LinearLayout
+            android:id="@+id/rateAppLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/background_press_black"
+            >
+
+            <TextView
+                android:id="@+id/rateTitleText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/leave_rating"
+                android:textAppearance="@android:style/TextAppearance.Large" />
+
+            <TextView
+                android:id="@+id/rateInfoText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/leave_rating_info" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <com.google.android.gms.ads.AdView
+        android:id="@+id/settingsAd"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        ads:adSize="BANNER"
+        ads:adUnitId="@string/settings_ad_id"
+        android:layout_alignParentBottom="true"
         />
 
-</LinearLayout>
+</RelativeLayout>
+

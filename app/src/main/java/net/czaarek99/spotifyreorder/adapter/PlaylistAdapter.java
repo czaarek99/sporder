@@ -18,6 +18,7 @@ import net.czaarek99.spotifyreorder.activity.TracksActivity;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 
 import kaaes.spotify.webapi.android.models.PlaylistSimple;
@@ -28,10 +29,11 @@ import kaaes.spotify.webapi.android.models.PlaylistSimple;
 
 public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.ViewHolder> {
 
-    private final List<PlaylistSimple> cachedSpotifyOrder = new ArrayList<>();
+    private List<PlaylistSimple> severPlaylistList = new ArrayList<>();
     private final PlaylistsActivity activity;
     private List<PlaylistSimple> itemList;
     private String sortMode;
+    private boolean hideEmptyPlaylists;
 
     public PlaylistAdapter(final PlaylistsActivity activity, List<PlaylistSimple> list) {
         setHasStableIds(true);
@@ -63,44 +65,51 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.ViewHo
     }
 
     public void setItemList(List<PlaylistSimple> itemList){
-        cachedSpotifyOrder.clear();
-        cachedSpotifyOrder.addAll(itemList);
-
-        this.itemList = itemList;
-        sort();
-        notifyDataSetChanged();
+        severPlaylistList.clear();
+        severPlaylistList.addAll(itemList);
+        updateList();
     }
 
     public void setSortMethod(String sortMode){
         this.sortMode = sortMode;
-        sort();
-        notifyDataSetChanged();
     }
 
-    private void sort(){
-        if(itemList.size() > 0){
-            if(sortMode.equals(getString(R.string.alphabetically))){
-                Collections.sort(itemList, new Comparator<PlaylistSimple>() {
-                    @Override
-                    public int compare(PlaylistSimple o1, PlaylistSimple o2) {
-                        return o1.name.compareTo(o2.name);
-                    }
-                });
-            } else if(sortMode.equals(getString(R.string.most_tracks))){
-                Collections.sort(itemList, new Comparator<PlaylistSimple>() {
-                    @Override
-                    public int compare(PlaylistSimple o1, PlaylistSimple o2) {
-                        Integer trackAmount1 = o1.tracks.total;
-                        Integer trackAmount2 = o2.tracks.total;
-                        return -trackAmount1.compareTo(trackAmount2);
-                    }
-                });
-            } else if(sortMode.equals(getString(R.string.spotify_sort))){
-                if(!itemList.equals(cachedSpotifyOrder)){
-                    this.itemList = cachedSpotifyOrder;
+    public void setHideEmptyPlaylists(boolean hideEmpty) {
+        this.hideEmptyPlaylists = hideEmpty;
+    }
+
+    public void updateList(){
+        itemList = new ArrayList<>();
+        itemList.addAll(severPlaylistList);
+
+        if(sortMode.equals(getString(R.string.alphabetically))){
+            Collections.sort(itemList, new Comparator<PlaylistSimple>() {
+                @Override
+                public int compare(PlaylistSimple o1, PlaylistSimple o2) {
+                    return o1.name.compareTo(o2.name);
+                }
+            });
+        } else if(sortMode.equals(getString(R.string.most_tracks))){
+            Collections.sort(itemList, new Comparator<PlaylistSimple>() {
+                @Override
+                public int compare(PlaylistSimple o1, PlaylistSimple o2) {
+                    Integer trackAmount1 = o1.tracks.total;
+                    Integer trackAmount2 = o2.tracks.total;
+                    return -trackAmount1.compareTo(trackAmount2);
+                }
+            });
+        }
+
+        if(hideEmptyPlaylists){
+            for (Iterator<PlaylistSimple> iterator = itemList.iterator(); iterator.hasNext(); ) {
+                PlaylistSimple playlistSimple = iterator.next();
+                if (playlistSimple.tracks.total < 1) {
+                    iterator.remove();
                 }
             }
         }
+
+        notifyDataSetChanged();
     }
 
     private String getString(int resId){

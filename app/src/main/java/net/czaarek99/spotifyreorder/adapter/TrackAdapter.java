@@ -79,18 +79,11 @@ public class TrackAdapter extends DragItemAdapter<Pair<Long, Track>, TrackAdapte
         return hasSelection;
     }
 
-    public void onDragFinish() {
-        isDragging = false;
-        clearSelection();
+    public void setDragging(boolean dragging) {
+        isDragging = dragging;
     }
 
-    public void onDragStart(){
-        isDragging = true;
-        notifyDataSetChanged();
-    }
-
-    public void clearSelection(){
-        tracksActivity.animateOutClearSelectionButton();
+    public void clearSelection() {
         tracksActivity.tracksSettingsImage.setVisibility(View.INVISIBLE);
 
         hasSelection = false;
@@ -111,25 +104,22 @@ public class TrackAdapter extends DragItemAdapter<Pair<Long, Track>, TrackAdapte
     /*
     If you edit this method please test that moving tracks up and down still works properly
      */
-    public void changeSelectionPosition(int fromPosition, int toPosition){
+    public void changeSelectionPosition(int fromPosition, int toPosition) {
         boolean movedDown = toPosition > fromPosition;
         int sizeOfItemsLeftToMove = getSelectionSize();
 
-        if(movedDown){
-            for(int i = 0; i < sizeOfItemsLeftToMove; i++){
-                changeItemPosition(fromPosition, toPosition);
-            }
-        } else {
-            for(int i = 0; i < sizeOfItemsLeftToMove; i++){
-                changeItemPosition(fromPosition, toPosition);
+        for (int i = 0; i < sizeOfItemsLeftToMove; i++) {
+            changeItemPosition(fromPosition, toPosition);
+
+            if(!movedDown){
                 fromPosition++;
                 toPosition++;
             }
         }
     }
 
-    public void quietPositionChange(int fromPos, int toPos){
-        if(this.mItemList != null && this.mItemList.size() > fromPos && this.mItemList.size() > toPos) {
+    public void quietPositionChange(int fromPos, int toPos) {
+        if (this.mItemList != null && this.mItemList.size() > fromPos && this.mItemList.size() > toPos) {
             Pair<Long, Track> item = this.mItemList.remove(fromPos);
             this.mItemList.add(toPos, item);
         }
@@ -156,14 +146,14 @@ public class TrackAdapter extends DragItemAdapter<Pair<Long, Track>, TrackAdapte
             return !hasSelection || position >= selectionStart;
         }
 
-        private boolean isInSelection(int position){
+        private boolean isInSelection(int position) {
             return position >= selectionStart && position <= selectionEnd;
         }
 
-        void determineVisibility(){
+        void determineVisibility() {
             mainLayout.setVisibility(View.VISIBLE);
 
-            if(hasSelection() && isDragging && isInSelection(getAdapterPosition())){
+            if (hasSelection() && isDragging && isInSelection(getAdapterPosition())) {
                 mainLayout.setVisibility(View.INVISIBLE);
             }
         }
@@ -171,11 +161,11 @@ public class TrackAdapter extends DragItemAdapter<Pair<Long, Track>, TrackAdapte
         void initImage() {
             reorderImage.setVisibility(View.INVISIBLE);
 
-            if(canCreateSelection){
+            if (canCreateSelection) {
                 reorderImage.setVisibility(View.VISIBLE);
 
-                if(hasSelection()) {
-                    if(getAdapterPosition() == selectionStart){
+                if (hasSelection()) {
+                    if (getAdapterPosition() == selectionStart) {
                         reorderImage.setVisibility(View.VISIBLE);
                     } else {
                         reorderImage.setVisibility(View.INVISIBLE);
@@ -191,7 +181,7 @@ public class TrackAdapter extends DragItemAdapter<Pair<Long, Track>, TrackAdapte
             if (canCreateSelection) {
                 final boolean isClickable = isClickable(getAdapterPosition());
 
-                if(isDragging){
+                if (isDragging) {
                     checkBox.setVisibility(View.INVISIBLE);
                 } else {
                     if (isClickable) {
@@ -217,7 +207,8 @@ public class TrackAdapter extends DragItemAdapter<Pair<Long, Track>, TrackAdapte
                             if (isInSelection) {
                                 if (hasSelection) {
                                     if (position == selectionStart) {
-                                       clearSelection();
+                                        tracksActivity.animateOutClearSelectionButton();
+                                        clearSelection();
                                     } else {
                                         selectionEnd = position - 1;
                                         notifyDataSetChanged();
