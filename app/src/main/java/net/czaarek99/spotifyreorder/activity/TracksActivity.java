@@ -254,6 +254,8 @@ public class TracksActivity extends SporderActivity {
                 if(trackListAdapter.hasSelection()){
                     trackListAdapter.clearSelection();
                 }
+
+                animateOutClearSelectionButton();
             }
 
             @Override

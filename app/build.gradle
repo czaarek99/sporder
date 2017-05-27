@@ -15,8 +15,8 @@ android {
         applicationId "net.czaarek99.spotifyreorder"
         minSdkVersion 16
         targetSdkVersion 25
-        versionCode 11
-        versionName "1.0.6"
+        versionCode 12
+        versionName "1.0.7"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
     }
