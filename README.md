@@ -1,12 +1,5 @@
 # Sporder #
 
-An alternative spotify client
+A simple android app that allows for advanced spotify playlist management on android. 
 
-### Commit Guidelines ###
-* [IMPROVED] - For things that were not broken but now work smoother and better
-* [ADDED] - For new features
-* [FIXED] - For bugfixes
-* [REMOVED] - For removed features
-* [LIBRARY] - For dependency modifications
-* [WIP] - For improvements and additions of not yet working features
-* [CHANGED] - For changes that don't really affect the application in neither a negative or positive way
+Currently the Spotify android app does not allow you to move tracks around in your playlist in their first party application. This application allows you to move multiple tracks at once.
